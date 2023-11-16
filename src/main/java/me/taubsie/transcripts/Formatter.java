@@ -1,9 +1,13 @@
-package me.ryzeon.transcripts;
+package me.taubsie.transcripts;
+
+import lombok.experimental.UtilityClass;
 
 import java.awt.*;
+import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import lombok.experimental.UtilityClass;
+import java.util.stream.Collectors;
 
 /**
  * Created by Ryzeon
@@ -19,8 +23,8 @@ public class Formatter {
     private final Pattern EM = Pattern.compile("\\*(.+?)\\*");
     private final Pattern S = Pattern.compile("~~(.+?)~~");
     private final Pattern U = Pattern.compile("__(.+?)__");
-    private final Pattern CODE = Pattern.compile("```(.+?)```");
-    private final Pattern CODE_1 = Pattern.compile("`(.+?)`");
+    private final Pattern CODE = Pattern.compile("```[\\S\\s]*?```");
+    private final Pattern CODE_1 = Pattern.compile("`[^`]++`");
     // conver this /(?:\r\n|\r|\n)/g to patter in java
     private final Pattern NEW_LINE = Pattern.compile("\\n");
 
@@ -34,61 +38,81 @@ public class Formatter {
     }
 
     public String format(String originalText) {
-        System.out.println(originalText);
         Matcher matcher = STRONG.matcher(originalText);
         String newText = originalText;
-        while (matcher.find()) {
+        while(matcher.find()) {
             String group = matcher.group();
             newText = newText.replace(group,
                     "<strong>" + group.replace("**", "") + "</strong>");
         }
         matcher = EM.matcher(newText);
-        while (matcher.find()) {
+        while(matcher.find()) {
             String group = matcher.group();
             newText = newText.replace(group,
                     "<em>" + group.replace("*", "") + "</em>");
         }
         matcher = S.matcher(newText);
-        while (matcher.find()) {
+        while(matcher.find()) {
             String group = matcher.group();
             newText = newText.replace(group,
                     "<s>" + group.replace("~~", "") + "</s>");
         }
         matcher = U.matcher(newText);
-        while (matcher.find()) {
+        while(matcher.find()) {
             String group = matcher.group();
             newText = newText.replace(group,
                     "<u>" + group.replace("__", "") + "</u>");
         }
         matcher = CODE.matcher(newText);
         boolean findCode = false;
-        while (matcher.find()) {
+        while(matcher.find()) {
             String group = matcher.group();
             newText = newText.replace(group,
                     "<div class=\"pre pre--multiline nohighlight\">"
-                            + group.replace("```", "").substring(3, -3) + "</div>");
+                            + formatCodeBlock(group) + "</div>");
             findCode = true;
         }
         if (!findCode) {
             matcher = CODE_1.matcher(newText);
-            while (matcher.find()) {
+            while(matcher.find()) {
                 String group = matcher.group();
                 newText = newText.replace(group,
                         "<span class=\"pre pre--inline\">" + group.replace("`", "") + "</span>");
             }
         }
         matcher = NEW_LINE.matcher(newText);
-        while (matcher.find()) {
+        while(matcher.find()) {
             newText = newText.replace(matcher.group(), "<br />");
         }
         return newText;
     }
 
+    public String formatCodeBlock(String group) {
+        String result = group.replace("```", "");
+
+        AtomicBoolean empty = new AtomicBoolean(true);
+        result = Arrays.stream(result.split("\n"))
+                .sequential().filter(s -> {
+                    if(empty.get()) {
+                        if(s.isBlank()) {
+                            return false;
+                        } else {
+                            empty.set(false);
+                            return true;
+                        }
+                    } else {
+                        return true;
+                    }
+                }).collect(Collectors.joining("\n"));
+
+        return result;
+    }
+
     public String toHex(Color color) {
-        String hex = Integer.toHexString(color.getRGB() & 0xffffff);
-        while(hex.length() < 6){
-            hex = "0" + hex;
+        StringBuilder hex = new StringBuilder(Integer.toHexString(color.getRGB() & 0xffffff));
+        while(hex.length() < 6) {
+            hex.insert(0, "0");
         }
-        return hex;
+        return hex.toString();
     }
 }
