@@ -40,6 +40,28 @@ publishing {
             name = artifactId
             description = project.description
             url = "https://github.com/dungeon-hub/discord-html-transcripts"
+
+            //TODO license?
+
+            organization {
+                name = "Dungeon Hub"
+                url = "https://dungeon-hub.net/"
+            }
+
+            scm {
+                url = "https://github.com/dungeon-hub/discord-html-transcripts"
+                connection = "scm:git://github.com:dungeon-hub/discord-html-transcripts.git"
+                developerConnection = "scm:git://github.com:dungeon-hub/discord-html-transcripts.git"
+            }
+
+            developers {
+                developer {
+                    id = "taubsie"
+                    name = "Taubsie"
+                    email = "taubsie@dungeon-hub.net"
+                    organizationUrl = "https://dungeon-hub.net/"
+                }
+            }
         }
     }
 }
