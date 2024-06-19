@@ -4,6 +4,7 @@
 [versions]
 dev-kord-kord-core-jvm = "0.12.0"
 org-javacord-javacord-api = "3.8.0"
+net-dv8tion-jda = "5.0.0-beta.22"
 org-jetbrains-kotlin-kotlin-stdlib-jdk8 = "2.0.0"
 org-jetbrains-kotlin-kotlin-test = "2.0.0"
 org-jsoup-jsoup = "1.15.3"
@@ -12,6 +13,7 @@ org-projectlombok-lombok = "1.18.28"
 [libraries]
 dev-kord-kord-core-jvm = { module = "dev.kord:kord-core-jvm", version.ref = "dev-kord-kord-core-jvm" }
 org-javacord-javacord-api = { module = "org.javacord:javacord-api", version.ref = "org-javacord-javacord-api" }
+net-dv8tion-jda = { module = "net.dv8tion:JDA", version.ref = "net-dv8tion-jda" }
 org-jetbrains-kotlin-kotlin-stdlib-jdk8 = { module = "org.jetbrains.kotlin:kotlin-stdlib-jdk8", version.ref = "org-jetbrains-kotlin-kotlin-stdlib-jdk8" }
 org-jetbrains-kotlin-kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "org-jetbrains-kotlin-kotlin-test" }
 org-jsoup-jsoup = { module = "org.jsoup:jsoup", version.ref = "org-jsoup-jsoup" }
