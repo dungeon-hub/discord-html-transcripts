@@ -1,15 +1,14 @@
-import java.lang.System.getenv
-import java.util.*
+import net.thebugmc.gradle.sonatypepublisher.PublishingType
 
 plugins {
     id("java-library")
-    `maven-publish`
-    signing
-    kotlin("jvm") version("2.0.0")
+    id("net.thebugmc.gradle.sonatype-central-portal-publisher").version("1.2.3")
+    kotlin("jvm") version ("2.0.0")
 }
 
 group = "net.dungeon-hub"
-version = "1.0-SNAPSHOT"
+val artifactId = "transcripts-core"
+version = "0.1"
 description = "The core project to bring Discord Transcripts to the JVM."
 
 repositories {
@@ -25,42 +24,41 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter")
 }
 
-val isReleaseVersion = !version.toString().endsWith("SNAPSHOT")
+centralPortal {
+    name = artifactId
+    publishingType = PublishingType.USER_MANAGED
 
-publishing {
-    publications.create<MavenPublication>("maven") {
-        from(components["java"])
+    pom {
+        name = artifactId
+        description = project.description
+        url = "https://github.com/dungeon-hub/discord-html-transcripts"
 
-        groupId = project.group.toString()
-        artifactId = "transcripts-core"
-        version = project.version.toString()
+        organization {
+            name = "Dungeon Hub"
+            url = "https://dungeon-hub.net/"
+        }
 
-        pom {
-            groupId = project.group.toString()
-            name = artifactId
-            description = project.description
+        scm {
             url = "https://github.com/dungeon-hub/discord-html-transcripts"
+            connection = "scm:git://github.com:dungeon-hub/discord-html-transcripts.git"
+            developerConnection = "scm:git://github.com:dungeon-hub/discord-html-transcripts.git"
+        }
 
-            //TODO license?
-
-            organization {
-                name = "Dungeon Hub"
-                url = "https://dungeon-hub.net/"
+        developers {
+            developer {
+                id = "taubsie"
+                name = "Taubsie"
+                email = "taubsie@dungeon-hub.net"
+                url = "https://github.com/Taubsie/"
+                organizationUrl = "https://dungeon-hub.net/"
             }
+        }
 
-            scm {
-                url = "https://github.com/dungeon-hub/discord-html-transcripts"
-                connection = "scm:git://github.com:dungeon-hub/discord-html-transcripts.git"
-                developerConnection = "scm:git://github.com:dungeon-hub/discord-html-transcripts.git"
-            }
-
-            developers {
-                developer {
-                    id = "taubsie"
-                    name = "Taubsie"
-                    email = "taubsie@dungeon-hub.net"
-                    organizationUrl = "https://dungeon-hub.net/"
-                }
+        licenses {
+            license {
+                name = "GPL-3.0"
+                url = "https://www.gnu.org/licenses/gpl-3.0"
+                distribution = "https://www.gnu.org/licenses/gpl-3.0.txt"
             }
         }
     }
@@ -77,15 +75,4 @@ java {
 
 tasks.test {
     useJUnitPlatform()
-}
-
-signing {
-    val secretKey = getenv("SIGNING_KEY")?.let { String(Base64.getDecoder().decode(it)) }
-    val password = getenv("SIGNING_PASSWORD")
-    useInMemoryPgpKeys(secretKey, password)
-    sign(publishing.publications)
-}
-
-tasks.withType(Sign::class) {
-    onlyIf { isReleaseVersion }
 }
