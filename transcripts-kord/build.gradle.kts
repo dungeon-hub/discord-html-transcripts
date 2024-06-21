@@ -1,11 +1,15 @@
+import net.thebugmc.gradle.sonatypepublisher.PublishingType
+
 plugins {
     id("java-library")
-    `maven-publish`
+    id("net.thebugmc.gradle.sonatype-central-portal-publisher").version("1.2.3")
     kotlin("jvm") version("2.0.0")
 }
 
 group = "net.dungeon-hub"
-version = "1.0-SNAPSHOT"
+val artifactId = "transcripts-kord"
+version = "0.1"
+description = "The Kord implementation for discord transcripts."
 
 repositories {
     mavenLocal()
@@ -20,9 +24,43 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter")
 }
 
-publishing {
-    publications.create<MavenPublication>("maven") {
-        from(components["java"])
+centralPortal {
+    name = artifactId
+    publishingType = PublishingType.USER_MANAGED
+
+    pom {
+        name = artifactId
+        description = project.description
+        url = "https://github.com/dungeon-hub/discord-html-transcripts"
+
+        organization {
+            name = "Dungeon Hub"
+            url = "https://dungeon-hub.net/"
+        }
+
+        scm {
+            url = "https://github.com/dungeon-hub/discord-html-transcripts"
+            connection = "scm:git://github.com:dungeon-hub/discord-html-transcripts.git"
+            developerConnection = "scm:git://github.com:dungeon-hub/discord-html-transcripts.git"
+        }
+
+        developers {
+            developer {
+                id = "taubsie"
+                name = "Taubsie"
+                email = "taubsie@dungeon-hub.net"
+                url = "https://github.com/Taubsie/"
+                organizationUrl = "https://dungeon-hub.net/"
+            }
+        }
+
+        licenses {
+            license {
+                name = "GPL-3.0"
+                url = "https://www.gnu.org/licenses/gpl-3.0"
+                distribution = "https://www.gnu.org/licenses/gpl-3.0.txt"
+            }
+        }
     }
 }
 
