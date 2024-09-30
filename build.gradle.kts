@@ -7,18 +7,22 @@ plugins {
 }
 
 repositories {
-    mavenLocal()
     maven {
         url = uri("https://repo.maven.apache.org/maven2/")
     }
-
     maven {
-        url = uri("https://ap-nexus-01.apollon.de/repository/prj-libs-snapshot/")
+        url = uri("https://repo.kordex.dev/releases")
+        name = "KordEx (Releases)"
     }
-
     maven {
-        url = uri("https://ap-nexus-01.apollon.de/repository/ext-release-local/")
+        url = uri("https://repo.kordex.dev/snapshots")
+        name = "KordEx (Snapshots)"
     }
+    maven {
+        url = uri("https://oss.sonatype.org/content/repositories/snapshots")
+        name = "Sonatype Snapshots (Legacy)"
+    }
+    mavenLocal()
 }
 
 tasks.withType<JavaCompile> {
