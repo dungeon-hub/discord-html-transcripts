@@ -3,22 +3,23 @@ import net.thebugmc.gradle.sonatypepublisher.PublishingType
 plugins {
     id("java-library")
     id("net.thebugmc.gradle.sonatype-central-portal-publisher").version("1.2.3")
-    kotlin("jvm") version("2.0.0")
+    kotlin("jvm") version("2.1.21")
 }
 
 group = "net.dungeon-hub"
 val artifactId = "transcripts-kord"
-version = "0.1.1"
+version = "0.1.2"
 description = "The Kord implementation for discord transcripts."
 
 repositories {
     mavenLocal()
     mavenCentral()
+    maven("https://mirror-repo.kordex.dev")
 }
 
 dependencies {
     api(project(":transcripts-core"))
-    api(libs.dev.kord.kord.core.jvm)
+    compileOnly(libs.dev.kord.kord.core.jvm)
 
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")

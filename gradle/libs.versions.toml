@@ -2,7 +2,7 @@
 # https://docs.gradle.org/current/userguide/platforms.html#sub::toml-dependencies-format
 
 [versions]
-dev-kord-kord-core-jvm = "0.15.0-SNAPSHOT"
+dev-kord-kord-core-jvm = "0.16.0-SNAPSHOT"
 org-javacord-javacord-api = "3.8.0"
 net-dv8tion-jda = "5.0.0-beta.22"
 org-jetbrains-kotlin-kotlin-stdlib-jdk8 = "2.0.0"
