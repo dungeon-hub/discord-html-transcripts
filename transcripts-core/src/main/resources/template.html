@@ -45,6 +45,11 @@
             font-weight: 400;
         }
 
+		br {
+			display: block;
+			margin: 1px 0;
+		}
+
         a {
             color: #00aff4;
             text-decoration: none;
@@ -60,12 +65,7 @@
 
         .markdown {
             max-width: 100%;
-            line-height: 1.3;
-            overflow-wrap: break-word;
-        }
-
-        .preserve-whitespace {
-            white-space: pre-wrap;
+            line-height: 1.2;
         }
 
         .spoiler-text {
@@ -168,6 +168,7 @@
         .preamble__guild-icon {
             max-width: 88px;
             max-height: 88px;
+            border-radius: 50%;
         }
 
         .preamble__entries-container {
@@ -408,6 +409,7 @@
             display: flex;
             margin-top: 0.3em;
             max-width: 520px;
+			margin-bottom: 0.9rem;
         }
 
         .chatlog__embed-color-pill {
@@ -425,7 +427,7 @@
             display: flex;
             flex-direction: column;
             padding: 0.5em 0.6em;
-            background-color: rgba(46, 48, 54, 0.3);
+            background-color: #2f3136;
             border: 1px solid rgba(46, 48, 54, 0.6);
             border-top-right-radius: 3px;
             border-bottom-right-radius: 3px;
@@ -442,14 +444,15 @@
 
         .chatlog__embed-author {
             display: flex;
-            margin-bottom: 0.3em;
+            margin-bottom: 0.1em;
+			margin-top: 0.1em;
             align-items: center;
         }
 
         .chatlog__embed-author-icon {
             margin-right: 0.5em;
-            width: 20px;
-            height: 20px;
+            width: 26px;
+            height: 26px;
             border-radius: 50%;
         }
 
@@ -464,15 +467,16 @@
         }
 
         .chatlog__embed-title {
-            margin-bottom: 0.2em;
-            font-size: 0.875em;
+			padding-top: 0.4em;
+            font-size: 0.980em;
             font-weight: 600;
             color: #ffffff;
         }
 
         .chatlog__embed-description {
-            font-weight: 500;
+            font-weight: 400;
             font-size: 0.85em;
+			padding-top: 0.6em;
             color: #dcddde;
         }
 
@@ -508,8 +512,8 @@
         }
 
         .chatlog__embed-thumbnail {
-            flex: 0;
             margin-left: 1.2em;
+			margin-top: 0.3em;
             max-width: 80px;
             max-height: 80px;
             border-radius: 3px;
@@ -606,15 +610,28 @@
         .postamble__entry {
             color: #ffffff;
         }
+
+        .img.emoji {
+            pointer-events: none;
+        }
     </style>
 
     <link rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/solarized-dark.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/highlight.min.js"></script>
+        href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/solarized-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+    <script src="https://unpkg.com/twemoji@latest/dist/twemoji.min.js" crossorigin="anonymous"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             document.querySelectorAll('.pre--multiline').forEach(block => hljs.highlightBlock(block));
         });
+    </script>
+
+
+    <!-- Script to render emojis as Twemojis -->
+    <script>
+        window.onload = function() {
+            twemoji.parse(document.body);
+        }
     </script>
 
     <script>
@@ -652,29 +669,29 @@
     <svg style="display: none">
         <symbol id="icon-attachment" viewBox="0 0 720 960">
             <path fill="#f4f5fb"
-                  d="M50,935a25,25,0,0,1-25-25V50A25,25,0,0,1,50,25H519.6L695,201.32V910a25,25,0,0,1-25,25Z" />
+                  d="M50,935a25,25,0,0,1-25-25V50A25,25,0,0,1,50,25H519.6L695,201.32V910a25,25,0,0,1-25,25Z"/>
             <path fill="#7789c4"
-                  d="M509.21,50,670,211.63V910H50V50H509.21M530,0H50A50,50,0,0,0,0,50V910a50,50,0,0,0,50,50H670a50,50,0,0,0,50-50h0V191Z" />
+                  d="M509.21,50,670,211.63V910H50V50H509.21M530,0H50A50,50,0,0,0,0,50V910a50,50,0,0,0,50,50H670a50,50,0,0,0,50-50h0V191Z"/>
             <path fill="#f4f5fb"
-                  d="M530,215a25,25,0,0,1-25-25V50a25,25,0,0,1,16.23-23.41L693.41,198.77A25,25,0,0,1,670,215Z" />
+                  d="M530,215a25,25,0,0,1-25-25V50a25,25,0,0,1,16.23-23.41L693.41,198.77A25,25,0,0,1,670,215Z"/>
             <path fill="#7789c4"
-                  d="M530,70.71,649.29,190H530V70.71M530,0a50,50,0,0,0-50,50V190a50,50,0,0,0,50,50H670a50,50,0,0,0,50-50Z" />
+                  d="M530,70.71,649.29,190H530V70.71M530,0a50,50,0,0,0-50,50V190a50,50,0,0,0,50,50H670a50,50,0,0,0,50-50Z"/>
         </symbol>
     </svg>
 </head>
 
 <body>
 
-<div class="preamble">
-    <div class="preamble__guild-icon-container">
-        <img class="preamble__guild-icon" src="https://discord.com/assets/f9bb9c4af2b9c32a2c5ee0014661546d.png"
-             alt="Guild icon" loading="lazy">
+    <div class="preamble">
+        <div class="preamble__guild-icon-container">
+            <img class="preamble__guild-icon " src="https://cdn.discordapp.com/icons/509504839869399064/8513e7314b64acad768ca9679544a74a.png"
+                alt="Guild icon" loading="lazy">
+        </div>
+        <div class="preamble__entries-container">
+            <div class="preamble__entry" id="guildname">Guild Name Here</div>
+            <div class="preamble__entry" id="ticketname">Channel Name Here</div>
+        </div>
     </div>
-    <div class="preamble__entries-container">
-        <div class="preamble__entry" id="guildname">Guild Name Here</div>
-        <div class="preamble__entry" id="ticketname">Channel Name Here</div>
-    </div>
-</div>l
 
 <div class="chatlog" id="chatlog">
 
