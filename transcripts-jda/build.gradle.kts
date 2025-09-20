@@ -8,7 +8,7 @@ plugins {
 
 group = "net.dungeon-hub"
 val artifactId = "transcripts-jda"
-version = "0.1"
+version = "0.2.0"
 description = "The JDA implementation for discord transcripts."
 
 repositories {
