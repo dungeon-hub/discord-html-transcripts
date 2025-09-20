@@ -4,7 +4,7 @@ import net.dungeonhub.wrapper.DiscordMessageAttachment
 import org.javacord.api.entity.message.MessageAttachment
 
 class JavacordMessageAttachment(val attachment: MessageAttachment): DiscordMessageAttachment {
-    override val fileName: String?
+    override val fileName: String
         get() = attachment.fileName
     override val isImage: Boolean
         get() = attachment.isImage

@@ -12,7 +12,7 @@ interface DiscordMessageEmbedField {
         val embedField = Element("div")
         embedField.addClass(
             if (isInline)
-                "chatlog__embed-field-inline"
+                "chatlog__embed-field--inline"
             else
                 "chatlog__embed-field"
         )

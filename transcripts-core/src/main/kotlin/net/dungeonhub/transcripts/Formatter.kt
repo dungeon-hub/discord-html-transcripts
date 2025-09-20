@@ -1,30 +1,34 @@
 package net.dungeonhub.transcripts
 
+import java.awt.Color
+import java.util.regex.Pattern
+import kotlin.math.ln
 import kotlin.math.pow
 
 /**
  * Created by Ryzeon
+ * Modified by Taubsie, for Kotlin and greater Framework support
  * Project: discord-html-transcripts
  * Date: 2/12/21 @ 00:32
  * Twitter: @Ryzeon_ 😎
  * Github: github.ryzeon.me
  */
 object Formatter {
-    private val STRONG: java.util.regex.Pattern = java.util.regex.Pattern.compile("\\*\\*(.+?)\\*\\*")
-    private val EM: java.util.regex.Pattern = java.util.regex.Pattern.compile("\\*(.+?)\\*")
-    private val S: java.util.regex.Pattern = java.util.regex.Pattern.compile("~~(.+?)~~")
-    private val U: java.util.regex.Pattern = java.util.regex.Pattern.compile("__(.+?)__")
-    private val CODE: java.util.regex.Pattern = java.util.regex.Pattern.compile("```[\\S\\s]*?```")
-    private val CODE_1: java.util.regex.Pattern = java.util.regex.Pattern.compile("`[^`]++`")
-
-    // conver this /(?:\r\n|\r|\n)/g to patter in java
-    private val NEW_LINE: java.util.regex.Pattern = java.util.regex.Pattern.compile("\\n")
+    private val STRONG: Pattern = Pattern.compile("\\*\\*(.+?)\\*\\*")
+    private val EM: Pattern = Pattern.compile("\\*(.+?)\\*")
+    private val S: Pattern = Pattern.compile("~~(.+?)~~")
+    private val U: Pattern = Pattern.compile("__(.+?)__")
+    private val CODE: Pattern = Pattern.compile("```(.+?)```")
+    private val CODE_1: Pattern = Pattern.compile("`(.+?)`")
+    private val QUOTE: Pattern = Pattern.compile("^>{1,3} (.*)$")
+    private val LINK: Pattern = Pattern.compile("\\[([^\\[]+)\\](\\((www|http:|https:)+[^\\s]+[\\w]\\))")
+    private val NEW_LINE: Pattern = Pattern.compile("\\n")
 
     fun formatBytes(bytes: Long): String {
         val unit = 1024
         if (bytes < unit) return "$bytes B"
-        val exp = (kotlin.math.ln(bytes.toDouble()) / kotlin.math.ln(unit.toDouble())).toInt()
-        val pre = "KMGTPE"[exp - 1].toString() + ""
+        val exp = (ln(bytes.toDouble()) / ln(unit.toDouble())).toInt()
+        val pre = "KMGTPE"[exp - 1].toString()
         return String.format("%.1f %sB", bytes / unit.toDouble().pow(exp.toDouble()), pre)
     }
 
@@ -62,6 +66,25 @@ object Formatter {
                 "<u>" + group.replace("__", "") + "</u>"
             )
         }
+        matcher = QUOTE.matcher(newText)
+        while (matcher.find()) {
+            val group = matcher.group()
+            newText = newText.replace(
+                group,
+                "<span class=\"quote\">" + group.replaceFirst(">>>".toRegex(), "")
+                    .replaceFirst(">".toRegex(), "") + "</span>"
+            )
+        }
+        matcher = LINK.matcher(newText)
+        while (matcher.find()) {
+            val group = matcher.group(1)
+            val link = matcher.group(2)
+            val raw = "[" + group + "]" + link
+
+            newText =
+                newText.replace(raw, "<a href=\"" + link.replace("(", "").replace(")", "") + "\">" + group + "</a>")
+        }
+
         matcher = CODE.matcher(newText)
         var findCode = false
         while (matcher.find()) {
@@ -69,7 +92,7 @@ object Formatter {
             newText = newText.replace(
                 group,
                 ("<div class=\"pre pre--multiline nohighlight\">"
-                        + formatCodeBlock(group) + "</div>")
+                        + group.replace("```", "").substring(3, -3) + "</div>")
             )
             findCode = true
         }
@@ -90,32 +113,11 @@ object Formatter {
         return newText
     }
 
-    fun formatCodeBlock(group: String): String {
-        var result = group.replace("```", "")
-
-        val empty = java.util.concurrent.atomic.AtomicBoolean(true)
-        result = java.util.Arrays.stream(result.split("\n".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray())
-            .sequential().filter { s: String ->
-                if (empty.get()) {
-                    if (s.isBlank()) {
-                        return@filter false
-                    } else {
-                        empty.set(false)
-                        return@filter true
-                    }
-                } else {
-                    return@filter true
-                }
-            }.collect(java.util.stream.Collectors.joining("\n"))
-
-        return result
-    }
-
-    fun toHex(color: java.awt.Color): String {
-        val hex = java.lang.StringBuilder(Integer.toHexString(color.rgb and 0xffffff))
+    fun toHex(color: Color): String {
+        var hex = Integer.toHexString(color.rgb and 0xffffff)
         while (hex.length < 6) {
-            hex.insert(0, "0")
+            hex = "0" + hex
         }
-        return hex.toString()
+        return hex
     }
 }

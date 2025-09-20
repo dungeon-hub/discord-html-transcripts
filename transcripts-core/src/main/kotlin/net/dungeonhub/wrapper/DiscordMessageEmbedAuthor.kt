@@ -14,10 +14,7 @@ interface DiscordMessageEmbedAuthor {
         if (iconUrl != null) {
             val embedAuthorIcon = Element("img")
             embedAuthorIcon.addClass("chatlog__embed-author-icon")
-            embedAuthorIcon.attr(
-                "src",
-                iconUrl!!
-            )
+            embedAuthorIcon.attr("src", iconUrl!!)
             embedAuthorIcon.attr("alt", "Author icon")
             embedAuthorIcon.attr("loading", "lazy")
 
@@ -30,10 +27,7 @@ interface DiscordMessageEmbedAuthor {
         if (url != null) {
             val embedAuthorNameLink = Element("a")
             embedAuthorNameLink.addClass("chatlog__embed-author-name-link")
-            embedAuthorNameLink.attr(
-                "href",
-                url!!
-            )
+            embedAuthorNameLink.attr("href", url!!)
             embedAuthorNameLink.text(name!!)
 
             embedAuthorName.appendChild(embedAuthorNameLink)

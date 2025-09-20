@@ -16,12 +16,15 @@ interface DiscordMessage {
     val author: DiscordMessageAuthor?
 
     fun transcriptify(): Element {
+        // create message group
         val messageGroup = Element("div")
         messageGroup.addClass("chatlog__message-group")
 
+        // message reference
         if (reference != null) {
-            val referenceMessage: DiscordMessage = reference!!
+            val referenceMessage = reference!!
 
+            // create symbol
             val referenceSymbol = Element("div")
             referenceSymbol.addClass("chatlog__reference-symbol")
 
@@ -54,91 +57,114 @@ interface DiscordMessage {
                             "</span>" +
                             "</div>")
                 )
-
-                messageGroup.appendChild(referenceSymbol)
-                messageGroup.appendChild(reference)
             }
+
+            messageGroup.appendChild(referenceSymbol)
+            messageGroup.appendChild(reference)
         }
 
-        if (author != null) {
-            messageGroup.appendChild(author!!.transcriptify())
+        val authorElement = Element("div")
+        authorElement.addClass("chatlog__author-avatar-container")
 
-            val content = Element("div")
-            content.addClass("chatlog__messages")
-            val authorName: Element = Element("span")
-            authorName.addClass("chatlog__author-name")
+        val authorAvatar = Element("img")
+        authorAvatar.addClass("chatlog__author-avatar")
+        authorAvatar.attr("alt", "Avatar")
+        authorAvatar.attr("loading", "lazy")
+
+        val authorName = Element("span")
+        authorName.addClass("chatlog__author-name")
+
+        if (author != null) {
             authorName.attr("title", author!!.displayName)
             authorName.text(author!!.name)
             authorName.attr("data-user-id", author!!.id.toString())
-            content.appendChild(authorName)
+            authorAvatar.attr("src", author!!.avatar)
+        } else {
+            // Handle the case when author is null (e.g., when the message is from a bot)
+            authorName.attr("title", "Bot")
+            authorName.text("Bot")
+            authorName.attr("data-user-id", "Bot")
+            authorAvatar.attr("src", "default_bot_avatar_url") // replace with your default bot avatar URL
+        }
 
-            if (author!!.isBot) {
-                val botTag = Element("span")
-                botTag.addClass("chatlog__bot-tag").text("BOT")
-                content.appendChild(botTag)
-            }
+        authorElement.appendChild(authorAvatar)
+        messageGroup.appendChild(authorElement)
 
-            // timestamp
-            val timestamp = Element("span")
-            timestamp.addClass("chatlog__timestamp")
+        // message content
+        val content = Element("div")
+        content.addClass("chatlog__messages")
 
-            timestamp.text(
+        content.appendChild(authorName)
+
+        if (author?.isBot == true) {
+            val botTag = Element("span")
+            botTag.addClass("chatlog__bot-tag").text("BOT")
+            content.appendChild(botTag)
+        }
+
+        // timestamp
+        val timestamp = Element("span")
+        timestamp.addClass("chatlog__timestamp")
+
+        timestamp.text(
+            DateTimeFormatter
+                .ofPattern("HH:mm:ss")
+                .withZone(ZoneId.systemDefault())
+                .format(creationTime)
+        )
+
+        content.appendChild(timestamp)
+
+        val messageContent = Element("div")
+        messageContent.addClass("chatlog__message")
+        messageContent.attr("data-message-id", id.toString())
+        messageContent.attr("id", "message-$id")
+        messageContent.attr(
+            "title",
+            "Message sent: ${
                 DateTimeFormatter
                     .ofPattern("HH:mm:ss")
                     .withZone(ZoneId.systemDefault())
                     .format(creationTime)
-            )
+            }"
+        )
 
-            content.appendChild(timestamp)
+        if (this.content.isNotBlank()) {
+            val messageContentContent = Element("div")
+            messageContentContent.addClass("chatlog__content")
 
-            val messageContent = Element("div")
-            messageContent.addClass("chatlog__message")
-            messageContent.attr("data-message-id", id.toString())
-            messageContent.attr("id", "message-$id")
-            messageContent.attr(
-                "title", "Message sent: "
-                        + DateTimeFormatter.ofPattern("HH:mm:ss").withZone(ZoneId.systemDefault())
-                    .format(creationTime)
-            )
+            val messageContentContentMarkdown = Element("div")
+            messageContentContentMarkdown.addClass("markdown")
 
-            if (this.content.isNotBlank()) {
-                val messageContentContent = Element("div")
-                messageContentContent.addClass("chatlog__content")
+            val messageContentContentMarkdownSpan = Element("span")
+            messageContentContentMarkdownSpan.addClass("preserve-whitespace")
+            messageContentContentMarkdownSpan.html(Formatter.format(this.content))
 
-                val messageContentContentMarkdown = Element("div")
-                messageContentContentMarkdown.addClass("markdown")
-
-                val messageContentContentMarkdownSpan = Element("span")
-                messageContentContentMarkdownSpan.addClass("preserve-whitespace")
-                messageContentContentMarkdownSpan
-                    .html(Formatter.format(this.content))
-
-                messageContentContentMarkdown.appendChild(messageContentContentMarkdownSpan)
-                messageContentContent.appendChild(messageContentContentMarkdown)
-                messageContent.appendChild(messageContentContent)
-            }
-
-            // messsage attachments
-            if (attachments.isNotEmpty()) {
-                for (attachment in attachments) {
-                    messageContent.appendChild(attachment.transcriptify())
-                }
-            }
-
-            content.appendChild(messageContent)
-
-            if (embeds.isNotEmpty()) {
-                for (embed in embeds) {
-                    if (embed == null) {
-                        continue
-                    }
-
-                    content.appendChild(embed.transcriptify())
-                }
-            }
-
-            messageGroup.appendChild(content)
+            messageContentContentMarkdown.appendChild(messageContentContentMarkdownSpan)
+            messageContentContent.appendChild(messageContentContentMarkdown)
+            messageContent.appendChild(messageContentContent)
         }
+
+        // message attachments
+        if (attachments.isNotEmpty()) {
+            for (attachment in attachments) {
+                messageContent.appendChild(attachment.transcriptify())
+            }
+        }
+
+        content.appendChild(messageContent)
+
+        if (embeds.isNotEmpty()) {
+            for (embed in embeds) {
+                if (embed == null) {
+                    continue
+                }
+
+                content.appendChild(embed.transcriptify())
+            }
+        }
+
+        messageGroup.appendChild(content)
 
         return messageGroup
     }

@@ -16,10 +16,7 @@ interface DiscordMessageEmbedFooter {
         if (iconUrl != null) {
             val embedFooterIcon = Element("img")
             embedFooterIcon.addClass("chatlog__embed-footer-icon")
-            embedFooterIcon.attr(
-                "src",
-                iconUrl!!
-            )
+            embedFooterIcon.attr("src", iconUrl!!)
             embedFooterIcon.attr("alt", "Footer icon")
             embedFooterIcon.attr("loading", "lazy")
 
@@ -31,9 +28,8 @@ interface DiscordMessageEmbedFooter {
 
         embedFooterText.text(
             if (timestamp != null) {
-                ((text ?: "") + " • "
-                        + DateTimeFormatter.ofPattern("HH:mm:ss")
-                    .withZone(ZoneId.systemDefault()).format(timestamp))
+                (text ?: "") + " • " + DateTimeFormatter.ofPattern("HH:mm:ss")
+                    .withZone(ZoneId.systemDefault()).format(timestamp)
             } else {
                 text ?: ""
             }

@@ -3,7 +3,7 @@ package net.dungeonhub.wrapper.javacord
 import net.dungeonhub.wrapper.DiscordMessageEmbedAuthor
 import org.javacord.api.entity.message.embed.EmbedAuthor
 
-class JavacordMessageEmbedAuthor(val author: EmbedAuthor): net.dungeonhub.wrapper.DiscordMessageEmbedAuthor {
+class JavacordMessageEmbedAuthor(val author: EmbedAuthor): DiscordMessageEmbedAuthor {
     override val name: String?
         get() = author.name
     override val iconUrl: String?

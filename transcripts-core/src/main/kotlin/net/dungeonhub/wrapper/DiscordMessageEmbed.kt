@@ -22,16 +22,18 @@ interface DiscordMessageEmbed {
         embedDiv.addClass("chatlog__embed")
 
         // embed color
-        if (color != null) {
-            val embedColorPill = Element("div")
+        val embedColorPill = Element("div")
+
+        if (color == null) {
+            embedColorPill.addClass("chatlog__embed-color-pill chatlog__embed-color-pill--default")
+        } else {
             embedColorPill.addClass("chatlog__embed-color-pill")
             embedColorPill.attr(
                 "style",
                 "background-color: #" + Formatter.toHex(color!!)
             )
-
-            embedDiv.appendChild(embedColorPill)
         }
+        embedDiv.appendChild(embedColorPill)
 
         val embedContentContainer = Element("div")
         embedContentContainer.addClass("chatlog__embed-content-container")
@@ -81,8 +83,7 @@ interface DiscordMessageEmbed {
 
             val embedDescriptionMarkdown = Element("div")
             embedDescriptionMarkdown.addClass("markdown preserve-whitespace")
-            embedDescriptionMarkdown
-                .html(Formatter.format(description ?: ""))
+            embedDescriptionMarkdown.html(Formatter.format(description!!))
 
             embedDescription.appendChild(embedDescriptionMarkdown)
             embedText.appendChild(embedDescription)

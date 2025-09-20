@@ -1,16 +1,15 @@
 package net.dungeonhub.wrapper
 
 import net.dungeonhub.transcripts.Formatter
+import net.dungeonhub.transcripts.utils.format.impl.AudioFormat
+import net.dungeonhub.transcripts.utils.format.impl.VideoFormat
 import org.jsoup.nodes.Element
 
-private val videoFormats: List<String> = mutableListOf(
-    "mp4", "webm", "mkv", "avi", "mov", "flv", "wmv", "mpg",
-    "mpeg"
-)
-private val audioFormats: List<String> = mutableListOf("mp3", "wav", "ogg", "flac")
+private val videoFormats = VideoFormat()
+private val audioFormats = AudioFormat()
 
 interface DiscordMessageAttachment {
-    val fileName: String?
+    val fileName: String
     val isImage: Boolean
     val url: String
     val size: Long
@@ -20,7 +19,7 @@ interface DiscordMessageAttachment {
         attachmentsDiv.addClass("chatlog__attachment")
 
         val attachmentType = fileName
-            ?.let { if (it.contains(".")) it else null }
+            .let { if (it.contains(".")) it else null }
             ?.let { it.substring(it.lastIndexOf(".") + 1) }
         if (isImage) {
             val attachmentLink = Element("a")
@@ -32,12 +31,12 @@ interface DiscordMessageAttachment {
             attachmentImage.attr("loading", "lazy")
             attachmentImage.attr(
                 "title",
-                ("Image: $fileName${Formatter.formatBytes(size)}")
+                "Image: $fileName${Formatter.formatBytes(size)}"
             )
 
             attachmentLink.appendChild(attachmentImage)
             attachmentsDiv.appendChild(attachmentLink)
-        } else if (attachmentType != null && videoFormats.contains(attachmentType)) {
+        } else if (attachmentType != null && videoFormats.isFormat(attachmentType)) {
             val attachmentVideo = Element("video")
             attachmentVideo.addClass("chatlog__attachment-media")
             attachmentVideo.attr("src", url)
@@ -45,11 +44,11 @@ interface DiscordMessageAttachment {
             attachmentVideo.attr("controls", true)
             attachmentVideo.attr(
                 "title",
-                ("Video: $fileName${Formatter.formatBytes(size)}")
+                "Video: $fileName${Formatter.formatBytes(size)}"
             )
 
             attachmentsDiv.appendChild(attachmentVideo)
-        } else if (attachmentType != null && audioFormats.contains(attachmentType)) {
+        } else if (attachmentType != null && audioFormats.isFormat(attachmentType)) {
             val attachmentAudio = Element("audio")
             attachmentAudio.addClass("chatlog__attachment-media")
             attachmentAudio.attr("src", url)
@@ -57,7 +56,7 @@ interface DiscordMessageAttachment {
             attachmentAudio.attr("controls", true)
             attachmentAudio.attr(
                 "title",
-                ("Audio: $fileName${Formatter.formatBytes(size)}")
+                "Audio: $fileName${Formatter.formatBytes(size)}"
             )
 
             attachmentsDiv.appendChild(attachmentAudio)
@@ -79,7 +78,7 @@ interface DiscordMessageAttachment {
 
             val attachmentGenericNameLink = Element("a")
             attachmentGenericNameLink.attr("href", url)
-            attachmentGenericNameLink.text(fileName ?: "Unknown name")
+            attachmentGenericNameLink.text(fileName)
 
             attachmentGenericName.appendChild(attachmentGenericNameLink)
             attachmentGeneric.appendChild(attachmentGenericName)
