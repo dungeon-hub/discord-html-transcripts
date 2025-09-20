@@ -75,8 +75,8 @@ interface DiscordMessage {
         authorName.addClass("chatlog__author-name")
 
         if (author != null) {
-            authorName.attr("title", author!!.displayName)
-            authorName.text(author!!.name)
+            authorName.attr("title", author!!.name)
+            authorName.text(author!!.displayName)
             authorName.attr("data-user-id", author!!.id.toString())
             authorAvatar.attr("src", author!!.avatar)
         } else {
@@ -98,7 +98,7 @@ interface DiscordMessage {
 
         if (author?.isBot == true) {
             val botTag = Element("span")
-            botTag.addClass("chatlog__bot-tag").text("BOT")
+            botTag.addClass("chatlog__bot-tag").text("APP")
             content.appendChild(botTag)
         }
 
