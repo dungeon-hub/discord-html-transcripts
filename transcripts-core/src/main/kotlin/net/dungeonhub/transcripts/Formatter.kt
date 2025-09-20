@@ -1,7 +1,10 @@
 package net.dungeonhub.transcripts
 
 import java.awt.Color
+import java.util.Arrays
+import java.util.concurrent.atomic.AtomicBoolean
 import java.util.regex.Pattern
+import java.util.stream.Collectors
 import kotlin.math.ln
 import kotlin.math.pow
 
@@ -92,7 +95,7 @@ object Formatter {
             newText = newText.replace(
                 group,
                 ("<div class=\"pre pre--multiline nohighlight\">"
-                        + group.replace("```", "").substring(3, -3) + "</div>")
+                        + formatCodeBlock(group) + "</div>")
             )
             findCode = true
         }
@@ -113,10 +116,31 @@ object Formatter {
         return newText
     }
 
+    fun formatCodeBlock(group: String): String {
+        var result = group.replace("```", "").trim()
+
+        val empty = AtomicBoolean(true)
+        result = Arrays.stream(result.split("\n".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray())
+            .sequential().filter { s: String ->
+                if (empty.get()) {
+                    if (s.isBlank()) {
+                        return@filter false
+                    } else {
+                        empty.set(false)
+                        return@filter true
+                    }
+                } else {
+                    return@filter true
+                }
+            }.collect(Collectors.joining("\n"))
+
+        return result
+    }
+
     fun toHex(color: Color): String {
         var hex = Integer.toHexString(color.rgb and 0xffffff)
         while (hex.length < 6) {
-            hex = "0" + hex
+            hex = "0${hex}"
         }
         return hex
     }
