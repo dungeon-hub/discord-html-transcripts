@@ -1,13 +1,14 @@
 package net.dungeonhub.wrapper.kord
 
 import dev.kord.core.entity.Embed
-import kotlinx.datetime.toJavaInstant
 import net.dungeonhub.wrapper.DiscordMessageEmbed
 import net.dungeonhub.wrapper.DiscordMessageEmbedAuthor
 import net.dungeonhub.wrapper.DiscordMessageEmbedField
 import net.dungeonhub.wrapper.DiscordMessageEmbedFooter
 import java.awt.Color
 import java.time.Instant
+import kotlin.time.ExperimentalTime
+import kotlin.time.toJavaInstant
 
 class KordMessageEmbed(val embed: Embed): DiscordMessageEmbed {
     override val color: Color?
@@ -28,6 +29,7 @@ class KordMessageEmbed(val embed: Embed): DiscordMessageEmbed {
         get() = embed.footer?.let { KordMessageEmbedFooter(it) }
     override val author: DiscordMessageEmbedAuthor?
         get() = embed.author?.let { KordMessageEmbedAuthor(it) }
+    @OptIn(ExperimentalTime::class)
     override val timestamp: Instant?
         get() = embed.timestamp?.toJavaInstant()
 }
