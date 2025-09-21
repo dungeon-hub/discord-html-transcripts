@@ -1,5 +1,6 @@
 package net.dungeonhub.wrapper.jda
 
+import net.dungeonhub.wrapper.DiscordInteraction
 import net.dungeonhub.wrapper.DiscordMessage
 import net.dungeonhub.wrapper.DiscordMessageAttachment
 import net.dungeonhub.wrapper.DiscordMessageAuthor
@@ -22,4 +23,6 @@ class JDAMessage(val message: Message): DiscordMessage {
         get() = message.referencedMessage?.let { JDAMessage(it) }
     override val author: DiscordMessageAuthor
         get() = JDAMessageAuthor(message.author, message.member)
+    override val interaction: DiscordInteraction?
+        get() = message.interaction?.let { JDAInteraction(it, message.author, message.member) }
 }

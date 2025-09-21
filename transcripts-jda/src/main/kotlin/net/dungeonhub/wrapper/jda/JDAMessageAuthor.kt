@@ -5,7 +5,7 @@ import net.dv8tion.jda.api.entities.Member
 import net.dv8tion.jda.api.entities.User
 import java.awt.Color
 
-class JDAMessageAuthor(val user: User, val member: Member?): DiscordMessageAuthor {
+open class JDAMessageAuthor(val user: User, val member: Member?): DiscordMessageAuthor {
     override val id: Long
         get() = user.idLong
     override val name: String

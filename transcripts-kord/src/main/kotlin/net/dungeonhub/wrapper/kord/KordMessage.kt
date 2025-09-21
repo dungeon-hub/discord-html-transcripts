@@ -25,10 +25,22 @@ class KordMessage(val message: Message) : DiscordMessage {
     override val reference: DiscordMessage?
         get() = message.referencedMessage?.let { KordMessage(it) }
     override val author: DiscordMessageAuthor?
-        get() = message.author?.let { runBlocking {
-            KordMessageAuthor(
-                it,
-                message.getAuthorAsMemberOrNull()
-            )
-        } }
+        get() = message.author?.let {
+            runBlocking {
+                KordMessageAuthor(
+                    it,
+                    message.getAuthorAsMemberOrNull()
+                )
+            }
+        }
+    override val interaction: KordInteraction?
+        get() = message.interaction?.let {
+            runBlocking {
+                KordInteraction(
+                    message.getGuild(),
+                    it,
+                    message.data.author
+                )
+            }
+        }
 }
