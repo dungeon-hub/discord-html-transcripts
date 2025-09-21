@@ -40,7 +40,7 @@ interface DiscordMessage {
                     ((((("<img class=\"chatlog__reference-avatar\" src=\""
                             + author.avatar) + "\" alt=\"Avatar\" loading=\"lazy\">" +
                             "<span class=\"chatlog__reference-name\" title=\"" + author.name
-                            ) + "\" style=\"color: " + color + "\">" + author.name) + "\"</span>" +
+                            ) + "\" style=\"color: " + color + "\">" + author.name) + "</span>" +
                             "<div class=\"chatlog__reference-content\">" +
                             " <span class=\"chatlog__reference-link\" onclick=\"scrollToMessage(event, '"
                             + referenceMessage.id) + "')\">" +
