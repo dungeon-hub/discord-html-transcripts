@@ -2,8 +2,8 @@ import net.thebugmc.gradle.sonatypepublisher.PublishingType
 
 plugins {
     id("java-library")
-    id("net.thebugmc.gradle.sonatype-central-portal-publisher").version("1.2.3")
-    kotlin("jvm") version ("2.0.0")
+    id("net.thebugmc.gradle.sonatype-central-portal-publisher").version("1.2.4")
+    kotlin("jvm") version ("2.2.20")
 }
 
 group = "net.dungeon-hub"
@@ -65,7 +65,7 @@ centralPortal {
 }
 
 kotlin {
-    jvmToolchain(17)
+    jvmToolchain(21)
 }
 
 java {

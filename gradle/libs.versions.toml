@@ -5,8 +5,8 @@
 dev-kord-kord-core-jvm = "0.17.0-SNAPSHOT"
 org-javacord-javacord-api = "3.8.0"
 net-dv8tion-jda = "5.0.0"
-org-jetbrains-kotlin-kotlin-stdlib-jdk8 = "2.0.0"
-org-jetbrains-kotlin-kotlin-test = "2.0.0"
+org-jetbrains-kotlin-kotlin-stdlib-jdk8 = "2.2.20"
+org-jetbrains-kotlin-kotlin-test = "2.2.20"
 org-jsoup-jsoup = "1.15.3"
 org-projectlombok-lombok = "1.18.28"
 

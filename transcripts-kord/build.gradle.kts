@@ -2,8 +2,8 @@ import net.thebugmc.gradle.sonatypepublisher.PublishingType
 
 plugins {
     id("java-library")
-    id("net.thebugmc.gradle.sonatype-central-portal-publisher").version("1.2.3")
-    kotlin("jvm") version("2.1.21")
+    id("net.thebugmc.gradle.sonatype-central-portal-publisher").version("1.2.4")
+    kotlin("jvm") version("2.2.20")
 }
 
 group = "net.dungeon-hub"
@@ -12,9 +12,12 @@ version = "0.2.1"
 description = "The Kord implementation for discord transcripts."
 
 repositories {
-    mavenLocal()
     mavenCentral()
-    maven("https://mirror-repo.kordex.dev")
+    maven {
+        url = uri("https://repo.kordex.dev/mirror")
+        name = "KordEx - Kord Mirror"
+    }
+    mavenLocal()
 }
 
 dependencies {
@@ -66,7 +69,7 @@ centralPortal {
 }
 
 kotlin {
-    jvmToolchain(17)
+    jvmToolchain(21)
 }
 
 java {
