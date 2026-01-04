@@ -4,6 +4,5 @@
 
 rootProject.name = "discord-html-transcripts"
 include(":transcripts-core")
-include(":transcripts-javacord")
 include(":transcripts-kord")
 include(":transcripts-jda")
