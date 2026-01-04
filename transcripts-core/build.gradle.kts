@@ -8,7 +8,7 @@ plugins {
 
 group = "net.dungeon-hub"
 val artifactId = "transcripts-core"
-version = "0.2.1"
+version = "0.2.2"
 description = "The core project to bring Discord Transcripts to the JVM."
 
 repositories {
