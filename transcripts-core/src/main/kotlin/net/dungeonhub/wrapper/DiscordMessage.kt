@@ -161,7 +161,7 @@ interface DiscordMessage {
 
         timestamp.text(
             DateTimeFormatter
-                .ofPattern("HH:mm:ss")
+                .ofPattern("HH:mm")
                 .withZone(ZoneId.systemDefault())
                 .format(creationTime)
         )
