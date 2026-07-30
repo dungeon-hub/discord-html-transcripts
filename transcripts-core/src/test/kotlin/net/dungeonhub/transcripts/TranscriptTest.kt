@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test
 import org.jsoup.Jsoup
 import java.time.Instant
 import java.awt.Color
+import kotlinx.coroutines.runBlocking
 
 class TranscriptTest {
 
@@ -13,13 +14,13 @@ class TranscriptTest {
         override val name: String = "Test Guild"
         override val icon: String? = "http://example.com/icon.png"
 
-        override fun getMemberName(id: Long): String? = if (id == 123L) "TestUser" else null
-        override fun getRoleName(id: Long): String? = if (id == 456L) "TestRole" else null
-        override fun getChannelName(id: Long): String? = if (id == 789L) "test-channel" else null
+        override suspend fun getMemberName(id: Long): String? = if (id == 123L) "TestUser" else null
+        override suspend fun getRoleName(id: Long): String? = if (id == 456L) "TestRole" else null
+        override suspend fun getChannelName(id: Long): String? = if (id == 789L) "test-channel" else null
     }
 
     @Test
-    fun testMentionFormatting() {
+    fun testMentionFormatting() = runBlocking {
         val rawText = "Hello <@123>, check <@&456> in <#789> and unknown <@999>"
         val formatted = Formatter.format(rawText, mockServer)
         
@@ -30,7 +31,7 @@ class TranscriptTest {
     }
 
     @Test
-    fun testBackslashEscaping() {
+    fun testBackslashEscaping() = runBlocking {
         // Escaped asterisks, underscores, and mentions should not be formatted, and backslashes should be removed.
         val text1 = "This is \\*\\*not bold\\*\\*"
         val formatted1 = Formatter.format(text1, mockServer)
@@ -50,7 +51,7 @@ class TranscriptTest {
     }
 
     @Test
-    fun testHtmlSafetyAndInjection() {
+    fun testHtmlSafetyAndInjection() = runBlocking {
         // Raw HTML should be escaped to prevent injection/XSS.
         val maliciousText = "<script>alert('xss')</script> and <b>bold HTML</b>"
         val formatted = Formatter.format(maliciousText, mockServer)
@@ -62,7 +63,7 @@ class TranscriptTest {
     }
 
     @Test
-    fun testCodeBlockIsolation() {
+    fun testCodeBlockIsolation() = runBlocking {
         // Backslashes and markdown characters inside code blocks should not be formatted.
         val codeText = "```\n\\*\\*not formatted\\*\\*\n```"
         val formatted = Formatter.format(codeText, mockServer)
@@ -72,7 +73,7 @@ class TranscriptTest {
     }
 
     @Test
-    fun testDateDividersAndTimestamps() {
+    fun testDateDividersAndTimestamps() = runBlocking {
         val channel = object : DiscordChannel<DiscordFramework> {
             override val framework: DiscordFramework = object : DiscordFramework {}
             override val name: String = "general"
@@ -91,7 +92,8 @@ class TranscriptTest {
         val dateDividers = doc.select(".chatlog__date-divider")
         assertEquals(2, dateDividers.size)
         // Check formatting structure
-        assertTrue(dateDividers[0].text().matches(Regex("\\d+ \\w+ \\d{4}")))
+        // Since we pinned to Locale.ENGLISH, the month name is alphanumeric (e.g. "July")
+        assertTrue(dateDividers[0].text().matches(Regex("\\d+ [A-Za-z]+ \\d{4}")))
 
         // Check for timestamp tooltips
         val timestamps = doc.select(".chatlog__timestamp")

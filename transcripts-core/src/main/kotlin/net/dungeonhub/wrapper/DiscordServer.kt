@@ -5,9 +5,9 @@ interface DiscordServer {
     val icon: String?
 
     /** Returns the member's effective (nick → global name → username) name, or null if not found. */
-    fun getMemberName(id: Long): String?
+    suspend fun getMemberName(id: Long): String?
     /** Returns the role's name, or null if not found. */
-    fun getRoleName(id: Long): String?
+    suspend fun getRoleName(id: Long): String?
     /** Returns the channel's name, or null if not found. */
-    fun getChannelName(id: Long): String?
+    suspend fun getChannelName(id: Long): String?
 }

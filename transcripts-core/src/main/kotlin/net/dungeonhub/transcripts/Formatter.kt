@@ -85,7 +85,7 @@ object Formatter {
             .replace("'", "&#x27;")
     }
 
-    fun format(originalText: String, server: DiscordServer? = null): String {
+    suspend fun format(originalText: String, server: DiscordServer? = null): String {
         var t = originalText
 
         val codeBlocks = mutableListOf<String>()
@@ -94,26 +94,22 @@ object Formatter {
         // Find multiline code blocks first
         val multilineMatcher = Pattern.compile("```([\\s\\S]*?)```").matcher(t)
         val sbMultiline = java.lang.StringBuffer()
-        var foundMultiline = false
         while (multilineMatcher.find()) {
-            foundMultiline = true
             codeBlocks.add("<div class=\"pre pre--multiline nohighlight\">" + formatCodeBlock(escapeHtml(multilineMatcher.group(1))) + "</div>")
             multilineMatcher.appendReplacement(sbMultiline, Matcher.quoteReplacement("\uE200_CODE_${codeIndex++}\uE201"))
         }
         multilineMatcher.appendTail(sbMultiline)
         t = sbMultiline.toString()
 
-        // If no multiline code blocks were found, process inline code blocks
-        if (!foundMultiline) {
-            val inlineMatcher = Pattern.compile("`([^`]+?)`").matcher(t)
-            val sbInline = java.lang.StringBuffer()
-            while (inlineMatcher.find()) {
-                codeBlocks.add("<span class=\"pre pre--inline\">${escapeHtml(inlineMatcher.group(1))}</span>")
-                inlineMatcher.appendReplacement(sbInline, Matcher.quoteReplacement("\uE200_CODE_${codeIndex++}\uE201"))
-            }
-            inlineMatcher.appendTail(sbInline)
-            t = sbInline.toString()
+        // Process inline code blocks
+        val inlineMatcher = Pattern.compile("`([^`]+?)`").matcher(t)
+        val sbInline = java.lang.StringBuffer()
+        while (inlineMatcher.find()) {
+            codeBlocks.add("<span class=\"pre pre--inline\">${escapeHtml(inlineMatcher.group(1))}</span>")
+            inlineMatcher.appendReplacement(sbInline, Matcher.quoteReplacement("\uE200_CODE_${codeIndex++}\uE201"))
         }
+        inlineMatcher.appendTail(sbInline)
+        t = sbInline.toString()
 
         // Preprocess escapes on the remaining text
         t = preprocessEscapes(t)
@@ -121,12 +117,17 @@ object Formatter {
         val mentionsList = mutableListOf<String>()
         var mentionIndex = 0
 
-        fun resolve(pattern: Pattern, prefix: Char, resolver: (Long) -> String?) {
+        suspend fun resolve(pattern: Pattern, prefix: Char, resolver: suspend (Long) -> String?) {
             val matcher = pattern.matcher(t)
             val sb = java.lang.StringBuffer()
             while (matcher.find()) {
-                val id = matcher.group(1).toLong()
-                val label = resolver(id)?.let { "$prefix$it" } ?: "$prefix${matcher.group(1)}"
+                val idStr = matcher.group(1)
+                val id = idStr.toLongOrNull()
+                val label = if (id != null) {
+                    resolver(id)?.let { "$prefix$it" } ?: "$prefix$idStr"
+                } else {
+                    "$prefix$idStr"
+                }
                 val resolvedHtml = "<span class=\"mention\">${escapeHtml(label)}</span>"
                 mentionsList.add(resolvedHtml)
                 matcher.appendReplacement(sb, Matcher.quoteReplacement("\uE100_MENTION_${mentionIndex++}\uE101"))

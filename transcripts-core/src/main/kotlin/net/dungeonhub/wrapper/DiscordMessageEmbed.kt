@@ -17,7 +17,7 @@ interface DiscordMessageEmbed {
     val author: DiscordMessageEmbedAuthor?
     val timestamp: Instant?
 
-    fun transcriptify(): Element {
+    suspend fun transcriptify(): Element {
         val embedDiv = Element("div")
         embedDiv.addClass("chatlog__embed")
 
