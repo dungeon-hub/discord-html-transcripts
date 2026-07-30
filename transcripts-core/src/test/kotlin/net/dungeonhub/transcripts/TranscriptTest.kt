@@ -30,6 +30,48 @@ class TranscriptTest {
     }
 
     @Test
+    fun testBackslashEscaping() {
+        // Escaped asterisks, underscores, and mentions should not be formatted, and backslashes should be removed.
+        val text1 = "This is \\*\\*not bold\\*\\*"
+        val formatted1 = Formatter.format(text1, mockServer)
+        assertEquals("This is **not bold**", formatted1)
+
+        val text2 = "This is \\_not italic\\_"
+        val formatted2 = Formatter.format(text2, mockServer)
+        assertEquals("This is _not italic_", formatted2)
+
+        val text3 = "Do not resolve \\<@123\\>"
+        val formatted3 = Formatter.format(text3, mockServer)
+        assertEquals("Do not resolve &lt;@123&gt;", formatted3)
+
+        val text4 = "Escaped backslash: \\\\\\*"
+        val formatted4 = Formatter.format(text4, mockServer)
+        assertEquals("Escaped backslash: \\*", formatted4)
+    }
+
+    @Test
+    fun testHtmlSafetyAndInjection() {
+        // Raw HTML should be escaped to prevent injection/XSS.
+        val maliciousText = "<script>alert('xss')</script> and <b>bold HTML</b>"
+        val formatted = Formatter.format(maliciousText, mockServer)
+        
+        assertFalse(formatted.contains("<script>"))
+        assertFalse(formatted.contains("<b>"))
+        assertTrue(formatted.contains("&lt;script&gt;"))
+        assertTrue(formatted.contains("&lt;b&gt;"))
+    }
+
+    @Test
+    fun testCodeBlockIsolation() {
+        // Backslashes and markdown characters inside code blocks should not be formatted.
+        val codeText = "```\n\\*\\*not formatted\\*\\*\n```"
+        val formatted = Formatter.format(codeText, mockServer)
+        
+        assertTrue(formatted.contains("\\*\\*not formatted\\*\\*"))
+        assertFalse(formatted.contains("<strong>"))
+    }
+
+    @Test
     fun testDateDividersAndTimestamps() {
         val channel = object : DiscordChannel<DiscordFramework> {
             override val framework: DiscordFramework = object : DiscordFramework {}
