@@ -40,8 +40,19 @@ object DiscordHtmlTranscripts {
 
         val chatLog = document.getElementById("chatlog")!! // chat log
 
+        val zone = java.time.ZoneId.systemDefault()
+        var lastDate: java.time.LocalDate? = null
+
         for (message in messages.sortedBy { it.creationTime }) {
-            chatLog.appendChild(message.transcriptify())
+            val msgDate = message.creationTime.atZone(zone).toLocalDate()
+            if (msgDate != lastDate) {
+                lastDate = msgDate
+                val divider = org.jsoup.nodes.Element("div")
+                divider.addClass("chatlog__date-divider")
+                divider.text(msgDate.format(java.time.format.DateTimeFormatter.ofPattern("d MMMM yyyy")))
+                chatLog.appendChild(divider)
+            }
+            chatLog.appendChild(message.transcriptify(channel.server))
         }
 
         return document.outerHtml()

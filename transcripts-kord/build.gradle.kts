@@ -13,10 +13,6 @@ description = "The Kord implementation for discord transcripts."
 
 repositories {
     mavenCentral()
-    maven {
-        url = uri("https://repo.kordex.dev/mirror")
-        name = "KordEx - Kord Mirror"
-    }
     mavenLocal()
 }
 

@@ -1,8 +1,10 @@
 package net.dungeonhub.transcripts
 
+import net.dungeonhub.wrapper.DiscordServer
 import java.awt.Color
 import java.util.Arrays
 import java.util.concurrent.atomic.AtomicBoolean
+import java.util.regex.Matcher
 import java.util.regex.Pattern
 import java.util.stream.Collectors
 import kotlin.math.ln
@@ -26,6 +28,10 @@ object Formatter {
     private val QUOTE: Pattern = Pattern.compile("^>{1,3} (.*)$")
     private val LINK: Pattern = Pattern.compile("\\[([^\\[]+)\\](\\((www|http:|https:)+[^\\s]+[\\w]\\))")
     private val NEW_LINE: Pattern = Pattern.compile("\\n")
+    // Discord mention patterns: user (<@id> or <@!id>), role (<@&id>), channel (<#id>)
+    private val MENTION_USER: Pattern = Pattern.compile("<@!?(\\d+)>")
+    private val MENTION_ROLE: Pattern = Pattern.compile("<@&(\\d+)>")
+    private val MENTION_CHANNEL: Pattern = Pattern.compile("<#(\\d+)>")
 
     fun formatBytes(bytes: Long): String {
         val unit = 1024
@@ -35,9 +41,40 @@ object Formatter {
         return String.format("%.1f %sB", bytes / unit.toDouble().pow(exp.toDouble()), pre)
     }
 
-    fun format(originalText: String): String {
-        var matcher = STRONG.matcher(originalText)
-        var newText = originalText
+    fun format(originalText: String, server: DiscordServer? = null): String {
+        // Resolve Discord mentions before markdown so mention content isn't double-processed.
+        // ponytail: linear scan per mention type; fine for typical message lengths (<2000 chars).
+        var newText = run {
+            var t = originalText
+            var m = MENTION_USER.matcher(t)
+            val sbUser = StringBuffer()
+            while (m.find()) {
+                val id = m.group(1).toLong()
+                val label = server?.getMemberName(id)?.let { "@$it" } ?: "@${m.group(1)}"
+                m.appendReplacement(sbUser, Matcher.quoteReplacement("<span class=\"mention\">$label</span>"))
+            }
+            m.appendTail(sbUser); t = sbUser.toString()
+
+            m = MENTION_ROLE.matcher(t)
+            val sbRole = StringBuffer()
+            while (m.find()) {
+                val id = m.group(1).toLong()
+                val label = server?.getRoleName(id)?.let { "@$it" } ?: "@${m.group(1)}"
+                m.appendReplacement(sbRole, Matcher.quoteReplacement("<span class=\"mention\">$label</span>"))
+            }
+            m.appendTail(sbRole); t = sbRole.toString()
+
+            m = MENTION_CHANNEL.matcher(t)
+            val sbChan = StringBuffer()
+            while (m.find()) {
+                val id = m.group(1).toLong()
+                val label = server?.getChannelName(id)?.let { "#$it" } ?: "#${m.group(1)}"
+                m.appendReplacement(sbChan, Matcher.quoteReplacement("<span class=\"mention\">$label</span>"))
+            }
+            m.appendTail(sbChan); t = sbChan.toString()
+            t
+        }
+        var matcher = STRONG.matcher(newText)
         while (matcher.find()) {
             val group = matcher.group()
             newText = newText.replace(

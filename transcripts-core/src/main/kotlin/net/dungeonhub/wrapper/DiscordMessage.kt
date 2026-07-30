@@ -1,6 +1,7 @@
 package net.dungeonhub.wrapper
 
 import net.dungeonhub.transcripts.Formatter
+import net.dungeonhub.wrapper.DiscordServer
 import org.jsoup.nodes.Element
 import java.time.Instant
 import java.time.ZoneId
@@ -17,7 +18,7 @@ interface DiscordMessage {
     val author: DiscordMessageAuthor?
     val interaction: DiscordInteraction?
 
-    fun transcriptify(): Element {
+    fun transcriptify(server: DiscordServer? = null): Element {
         // create message group
         val messageGroup = Element("div")
         messageGroup.addClass("chatlog__message-group")
@@ -165,6 +166,14 @@ interface DiscordMessage {
                 .withZone(ZoneId.systemDefault())
                 .format(creationTime)
         )
+        // Full date shown on hover via native browser tooltip — no JS required.
+        timestamp.attr(
+            "title",
+            DateTimeFormatter
+                .ofPattern("EEEE, d MMMM yyyy 'at' HH:mm")
+                .withZone(ZoneId.systemDefault())
+                .format(creationTime)
+        )
 
         content.appendChild(timestamp)
 
@@ -191,7 +200,7 @@ interface DiscordMessage {
 
             val messageContentContentMarkdownSpan = Element("span")
             messageContentContentMarkdownSpan.addClass("preserve-whitespace")
-            messageContentContentMarkdownSpan.html(Formatter.format(this.content))
+            messageContentContentMarkdownSpan.html(Formatter.format(this.content, server))
 
             messageContentContentMarkdown.appendChild(messageContentContentMarkdownSpan)
             messageContentContent.appendChild(messageContentContentMarkdown)
