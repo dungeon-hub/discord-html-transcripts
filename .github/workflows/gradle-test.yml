@@ -5,6 +5,12 @@ on:
         branches: [ "master" ]
     pull_request:
 
+concurrency:
+    group: gradle-${{ github.event.pull_request.number || github.ref }}
+    cancel-in-progress: true
+
+jobs:
+
 jobs:
     build:
         runs-on: ubuntu-latest
