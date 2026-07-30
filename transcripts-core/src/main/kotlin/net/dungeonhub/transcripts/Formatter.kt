@@ -97,10 +97,7 @@ object Formatter {
         var foundMultiline = false
         while (multilineMatcher.find()) {
             foundMultiline = true
-            val inner = multilineMatcher.group(1)
-            val escapedInner = escapeHtml(inner)
-            val formattedBlock = "<div class=\"pre pre--multiline nohighlight\">" + formatCodeBlock(escapedInner) + "</div>"
-            codeBlocks.add(formattedBlock)
+            codeBlocks.add("<div class=\"pre pre--multiline nohighlight\">" + formatCodeBlock(escapeHtml(multilineMatcher.group(1))) + "</div>")
             multilineMatcher.appendReplacement(sbMultiline, Matcher.quoteReplacement("\uE200_CODE_${codeIndex++}\uE201"))
         }
         multilineMatcher.appendTail(sbMultiline)
@@ -111,10 +108,7 @@ object Formatter {
             val inlineMatcher = Pattern.compile("`([^`]+?)`").matcher(t)
             val sbInline = java.lang.StringBuffer()
             while (inlineMatcher.find()) {
-                val inner = inlineMatcher.group(1)
-                val escapedInner = escapeHtml(inner)
-                val formattedBlock = "<span class=\"pre pre--inline\">$escapedInner</span>"
-                codeBlocks.add(formattedBlock)
+                codeBlocks.add("<span class=\"pre pre--inline\">${escapeHtml(inlineMatcher.group(1))}</span>")
                 inlineMatcher.appendReplacement(sbInline, Matcher.quoteReplacement("\uE200_CODE_${codeIndex++}\uE201"))
             }
             inlineMatcher.appendTail(sbInline)
@@ -127,44 +121,23 @@ object Formatter {
         val mentionsList = mutableListOf<String>()
         var mentionIndex = 0
 
-        // Resolve User Mentions
-        var userMatcher = MENTION_USER.matcher(t)
-        val sbUser = java.lang.StringBuffer()
-        while (userMatcher.find()) {
-            val id = userMatcher.group(1).toLong()
-            val label = server?.getMemberName(id)?.let { "@$it" } ?: "@${userMatcher.group(1)}"
-            val resolvedHtml = "<span class=\"mention\">${escapeHtml(label)}</span>"
-            mentionsList.add(resolvedHtml)
-            userMatcher.appendReplacement(sbUser, Matcher.quoteReplacement("\uE100_MENTION_${mentionIndex++}\uE101"))
+        fun resolve(pattern: Pattern, prefix: Char, resolver: (Long) -> String?) {
+            val matcher = pattern.matcher(t)
+            val sb = java.lang.StringBuffer()
+            while (matcher.find()) {
+                val id = matcher.group(1).toLong()
+                val label = resolver(id)?.let { "$prefix$it" } ?: "$prefix${matcher.group(1)}"
+                val resolvedHtml = "<span class=\"mention\">${escapeHtml(label)}</span>"
+                mentionsList.add(resolvedHtml)
+                matcher.appendReplacement(sb, Matcher.quoteReplacement("\uE100_MENTION_${mentionIndex++}\uE101"))
+            }
+            matcher.appendTail(sb)
+            t = sb.toString()
         }
-        userMatcher.appendTail(sbUser)
-        t = sbUser.toString()
 
-        // Resolve Role Mentions
-        var roleMatcher = MENTION_ROLE.matcher(t)
-        val sbRole = java.lang.StringBuffer()
-        while (roleMatcher.find()) {
-            val id = roleMatcher.group(1).toLong()
-            val label = server?.getRoleName(id)?.let { "@$it" } ?: "@${roleMatcher.group(1)}"
-            val resolvedHtml = "<span class=\"mention\">${escapeHtml(label)}</span>"
-            mentionsList.add(resolvedHtml)
-            roleMatcher.appendReplacement(sbRole, Matcher.quoteReplacement("\uE100_MENTION_${mentionIndex++}\uE101"))
-        }
-        roleMatcher.appendTail(sbRole)
-        t = sbRole.toString()
-
-        // Resolve Channel Mentions
-        var chanMatcher = MENTION_CHANNEL.matcher(t)
-        val sbChan = java.lang.StringBuffer()
-        while (chanMatcher.find()) {
-            val id = chanMatcher.group(1).toLong()
-            val label = server?.getChannelName(id)?.let { "#$it" } ?: "#${chanMatcher.group(1)}"
-            val resolvedHtml = "<span class=\"mention\">${escapeHtml(label)}</span>"
-            mentionsList.add(resolvedHtml)
-            chanMatcher.appendReplacement(sbChan, Matcher.quoteReplacement("\uE100_MENTION_${mentionIndex++}\uE101"))
-        }
-        chanMatcher.appendTail(sbChan)
-        t = sbChan.toString()
+        resolve(MENTION_USER, '@') { server?.getMemberName(it) }
+        resolve(MENTION_ROLE, '@') { server?.getRoleName(it) }
+        resolve(MENTION_CHANNEL, '#') { server?.getChannelName(it) }
 
         // Escape HTML on the remaining text
         t = escapeHtml(t)
