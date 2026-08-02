@@ -21,7 +21,7 @@ object Formatter {
     private val EM: Pattern = Pattern.compile("\\*(.+?)\\*")
     private val S: Pattern = Pattern.compile("~~(.+?)~~")
     private val U: Pattern = Pattern.compile("__(.+?)__")
-    private val CODE: Pattern = Pattern.compile("```(.+?)```")
+    private val CODE: Pattern = Pattern.compile("```(.+?)```", Pattern.DOTALL)
     private val CODE_1: Pattern = Pattern.compile("`(.+?)`")
     private val QUOTE: Pattern = Pattern.compile("^>{1,3} (.*)$")
     private val LINK: Pattern = Pattern.compile("\\[([^\\[]+)\\](\\((www|http:|https:)+[^\\s]+[\\w]\\))")
