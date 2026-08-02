@@ -25,6 +25,21 @@ data class TestAuthor(
     override val isBot: Boolean = false
 ) : DiscordMessageAuthor
 
+data class TestApplication(
+    override val id: Long,
+    override val name: String,
+    override val displayName: String = name,
+    override val roleColor: Color = Color.WHITE,
+    override val avatar: String = "https://example.com/application.png"
+) : DiscordApplication
+
+data class TestInteraction(
+    override val id: Long,
+    override val name: String,
+    override val user: DiscordMessageAuthor,
+    override val application: DiscordApplication? = null
+) : DiscordInteraction
+
 data class TestMessage(
     override val id: Long,
     override val content: String,
