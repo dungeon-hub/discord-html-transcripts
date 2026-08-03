@@ -12,7 +12,7 @@ class JDAMessage(val message: Message): DiscordMessage {
     override val id: Long
         get() = message.idLong
     override val content: String
-        get() = message.contentDisplay
+        get() = message.contentRaw
     override val embeds: List<DiscordMessageEmbed?>
         get() = message.embeds.map { JDAMessageEmbed(it) }
     override val attachments: List<DiscordMessageAttachment>

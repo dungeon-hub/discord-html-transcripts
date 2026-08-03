@@ -8,7 +8,7 @@ interface DiscordMessageEmbedField {
     val value: String
     val isInline: Boolean
 
-    fun transcriptify(): Element {
+    suspend fun transcriptify(): Element {
         val embedField = Element("div")
         embedField.addClass(
             if (isInline)

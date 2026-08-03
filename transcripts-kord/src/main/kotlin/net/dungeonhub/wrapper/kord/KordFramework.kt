@@ -17,6 +17,6 @@ fun GuildMessageChannel.toTranscriptableChannel(): DiscordChannel<KordFramework>
     return KordChannel(this)
 }
 
-fun GuildMessageChannel.createTranscript(): String {
+suspend fun GuildMessageChannel.createTranscript(): String {
     return DiscordHtmlTranscripts.createTranscript(toTranscriptableChannel())
 }

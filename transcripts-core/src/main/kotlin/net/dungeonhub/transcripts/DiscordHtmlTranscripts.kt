@@ -17,12 +17,12 @@ import java.io.IOException
  */
 object DiscordHtmlTranscripts {
     @Throws(IOException::class)
-    fun <FW : DiscordFramework> createTranscript(channel: DiscordChannel<FW>): String {
+    suspend fun <FW : DiscordFramework> createTranscript(channel: DiscordChannel<FW>): String {
         return generateFromMessages(channel, channel.messages)
     }
 
     @Throws(IOException::class)
-    fun <FW : DiscordFramework> generateFromMessages(
+    suspend fun <FW : DiscordFramework> generateFromMessages(
         channel: DiscordChannel<FW>,
         messages: List<DiscordMessage>
     ): String {
@@ -40,8 +40,20 @@ object DiscordHtmlTranscripts {
 
         val chatLog = document.getElementById("chatlog")!! // chat log
 
+        val zone = java.time.ZoneId.of("UTC")
+        val dateFormatter = java.time.format.DateTimeFormatter.ofPattern("d MMMM yyyy", java.util.Locale.ENGLISH)
+        var lastDate: java.time.LocalDate? = null
+
         for (message in messages.sortedBy { it.creationTime }) {
-            chatLog.appendChild(message.transcriptify())
+            val msgDate = message.creationTime.atZone(zone).toLocalDate()
+            if (msgDate != lastDate) {
+                lastDate = msgDate
+                val divider = org.jsoup.nodes.Element("div")
+                divider.addClass("chatlog__date-divider")
+                divider.text(msgDate.format(dateFormatter))
+                chatLog.appendChild(divider)
+            }
+            chatLog.appendChild(message.transcriptify(channel.server))
         }
 
         return document.outerHtml()
