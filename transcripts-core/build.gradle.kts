@@ -19,6 +19,7 @@ repositories {
 dependencies {
     implementation(kotlin("stdlib-jdk8"))
     api(libs.org.jsoup.jsoup)
+    api(libs.org.jetbrains.kotlinx.kotlinx.html)
 
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")

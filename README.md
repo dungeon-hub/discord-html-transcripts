@@ -43,4 +43,20 @@ try {
 }
 ```
 
+### Streaming into a file
+`writeTranscript` writes the document directly into any `Appendable` (e.g. a `Writer`) instead of building a `String` first.
+```kotlin
+File("transcript.html").bufferedWriter().use { writer ->
+    DiscordHtmlTranscripts.writeTranscript(channel, channel.messages, writer)
+}
+```
 
+### Rendering single components
+The transcript is built from [kotlinx.html](https://github.com/Kotlin/kotlinx.html) components in `net.dungeonhub.transcripts.components`
+(`message`, `embed`, `attachment`, `preamble`, ...), which can also be used to build custom pages:
+```kotlin
+val html = createHTML().div("chatlog") {
+    messages.forEach { message(it) }
+}
+```
+All user supplied text is escaped. The old jsoup based `transcriptify()` methods are deprecated and only kept for compatibility.

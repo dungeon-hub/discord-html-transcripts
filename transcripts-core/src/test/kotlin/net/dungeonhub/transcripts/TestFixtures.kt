@@ -1,8 +1,15 @@
 package net.dungeonhub.transcripts
 
+import kotlinx.html.FlowContent
+import kotlinx.html.div
+import kotlinx.html.stream.createHTML
 import net.dungeonhub.wrapper.*
+import org.jsoup.Jsoup
+import org.jsoup.nodes.Element
 import java.awt.Color
 import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 object TestFramework : DiscordFramework
 
@@ -87,3 +94,17 @@ data class TestEmbed(
     override val author: DiscordMessageEmbedAuthor? = null,
     override val timestamp: Instant? = null
 ) : DiscordMessageEmbed
+
+/**
+ * Renders a component into a wrapper `div` and parses it, so tests can query the result with CSS selectors.
+ */
+fun render(block: FlowContent.() -> Unit): Element {
+    val html = createHTML(prettyPrint = false).div { block() }
+    return Jsoup.parseBodyFragment(html).body().child(0)
+}
+
+fun shortTime(instant: Instant): String =
+    DateTimeFormatter.ofPattern("HH:mm").withZone(ZoneId.systemDefault()).format(instant)
+
+fun longTime(instant: Instant): String =
+    DateTimeFormatter.ofPattern("HH:mm:ss").withZone(ZoneId.systemDefault()).format(instant)

@@ -1,9 +1,11 @@
 package net.dungeonhub.transcripts
 
+import kotlinx.html.html
+import kotlinx.html.stream.appendHTML
+import net.dungeonhub.transcripts.components.transcript
 import net.dungeonhub.wrapper.DiscordChannel
 import net.dungeonhub.wrapper.DiscordFramework
 import net.dungeonhub.wrapper.DiscordMessage
-import org.jsoup.Jsoup
 import java.io.IOException
 
 /**
@@ -26,24 +28,21 @@ object DiscordHtmlTranscripts {
         channel: DiscordChannel<FW>,
         messages: List<DiscordMessage>
     ): String {
-        val htmlTemplate = javaClass.classLoader.getResourceAsStream("template.html")
+        return buildString { writeTranscript(channel, messages, this) }
+    }
 
-        val document = Jsoup.parse(htmlTemplate!!, "UTF-8", "")
-        document.outputSettings().indentAmount(0).prettyPrint(true)
-        document.getElementsByClass("preamble__guild-icon").first()!!
-            .attr("src", channel.server.icon ?: "") // set guild icon
-
-        document.getElementById("transcriptTitle")!!
-            .text("#" + channel.name + " | " + messages.size + " messages") // set title
-        document.getElementById("guildname")!!.text(channel.server.name) // set guild name
-        document.getElementById("ticketname")!!.text("#" + channel.name) // set channel name
-
-        val chatLog = document.getElementById("chatlog")!! // chat log
-
-        for (message in messages.sortedBy { it.creationTime }) {
-            chatLog.appendChild(message.transcriptify())
+    /**
+     * Streams the transcript of [messages] into [output], without building the whole document in memory first.
+     */
+    @Throws(IOException::class)
+    fun <FW : DiscordFramework> writeTranscript(
+        channel: DiscordChannel<FW>,
+        messages: List<DiscordMessage>,
+        output: Appendable
+    ) {
+        output.append("<!DOCTYPE html>\n")
+        output.appendHTML(prettyPrint = false).html {
+            transcript(channel, messages.sortedBy { it.creationTime })
         }
-
-        return document.outerHtml()
     }
 }
