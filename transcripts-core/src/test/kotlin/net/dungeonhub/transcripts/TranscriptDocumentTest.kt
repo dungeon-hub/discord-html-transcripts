@@ -61,6 +61,20 @@ class TranscriptDocumentTest {
     }
 
     @Test
+    fun `external resources are pinned and integrity checked`() {
+        val document = documentOf()
+        val resources = document.select("script[src]") + document.select("link[rel=stylesheet]")
+
+        assertEquals(3, resources.size)
+        resources.forEach { resource ->
+            val url = resource.attr("src").ifEmpty { resource.attr("href") }
+            assertTrue(!url.contains("@latest"), url)
+            assertTrue(resource.attr("integrity").startsWith("sha384-"), url)
+            assertEquals("anonymous", resource.attr("crossorigin"), url)
+        }
+    }
+
+    @Test
     fun `renders the preamble`() {
         val document = documentOf()
 
