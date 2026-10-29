@@ -1,7 +1,10 @@
 package net.dungeonhub.wrapper.kord
 
+import dev.kord.core.behavior.channel.asChannelOf
 import dev.kord.core.entity.Message
+import dev.kord.core.entity.channel.GuildMessageChannel
 import kotlinx.coroutines.runBlocking
+import net.dungeonhub.wrapper.DiscordChannel
 import net.dungeonhub.wrapper.DiscordMessage
 import net.dungeonhub.wrapper.DiscordMessageAttachment
 import net.dungeonhub.wrapper.DiscordMessageAuthor
@@ -43,4 +46,6 @@ class KordMessage(val message: Message) : DiscordMessage {
                 )
             }
         }
+    override val channel: DiscordChannel<KordFramework>
+        get() = runBlocking { KordChannel(message.channel.asChannelOf<GuildMessageChannel>()) }
 }

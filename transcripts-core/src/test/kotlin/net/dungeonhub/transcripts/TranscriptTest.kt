@@ -74,38 +74,88 @@ class TranscriptTest {
 
     @Test
     fun testDateDividersAndTimestamps() = runBlocking {
-        val channel = object : DiscordChannel<DiscordFramework> {
-            override val framework: DiscordFramework = object : DiscordFramework {}
-            override val name: String = "general"
-            override val server: DiscordServer = mockServer
-            override val messages: List<DiscordMessage> = listOf(
-                createMockMessage(1L, "Message 1", Instant.parse("2026-07-29T10:00:00Z")),
-                createMockMessage(2L, "Message 2", Instant.parse("2026-07-30T10:00:00Z")),
-                createMockMessage(3L, "Message 3", Instant.parse("2026-07-30T11:00:00Z"))
-            )
-        }
+        val times = listOf(
+            Instant.parse("2026-07-29T10:00:00Z"),
+            Instant.parse("2026-07-30T10:00:00Z"),
+            Instant.parse("2026-07-30T11:00:00Z")
+        )
+        val channel = MockChannel(times)
 
         val html = DiscordHtmlTranscripts.createTranscript(channel)
         val doc = Jsoup.parse(html)
 
-        // Check for date dividers
+        // the timestamps are 24h apart, so there's a day boundary between the first two in every time zone
         val dateDividers = doc.select(".chatlog__date-divider")
         assertEquals(2, dateDividers.size)
-        // Check formatting structure
-        // Since we pinned to Locale.ENGLISH, the month name is alphanumeric (e.g. "July")
-        assertTrue(dateDividers[0].text().matches(Regex("\\d+ [A-Za-z]+ \\d{4}")))
+        assertEquals(
+            TimeFormatter.formatDate(TimeFormatter.toLocalDateTime(times[0]).date),
+            dateDividers[0].text()
+        )
+        assertTrue(dateDividers[0].text().matches(Regex("\\d{1,2} [A-Z][a-z]+ \\d{4}")))
 
-        // Check for timestamp tooltips
         val timestamps = doc.select(".chatlog__timestamp")
-        assertTrue(timestamps.size >= 3)
-        for (ts in timestamps) {
-            val title = ts.attr("title")
-            assertNotNull(title)
-            assertTrue(title.contains("at"))
+        assertEquals(3, timestamps.size)
+        timestamps.zip(times).forEach { (timestamp, time) ->
+            assertEquals(TimeFormatter.formatTime(time), timestamp.text())
+            assertEquals(TimeFormatter.formatFullDateTime(time), timestamp.attr("title"))
+            assertTrue(timestamp.attr("title").matches(Regex("[A-Z][a-z]+day, \\d{1,2} [A-Z][a-z]+ \\d{4} at \\d{2}:\\d{2}")))
         }
     }
 
-    private fun createMockMessage(messageId: Long, msgContent: String, msgTime: Instant): DiscordMessage {
+    @Test
+    fun testMentionsResolveThroughMessageChannel() = runBlocking {
+        val message = MockChannel(listOf(Instant.parse("2026-07-30T10:00:00Z")), "Hi <@123>").messages.single()
+
+        val html = message.transcriptify().outerHtml()
+
+        assertTrue(html.contains("@TestUser"))
+    }
+
+    @Test
+    fun testOversizedMentionId() = runBlocking {
+        val formatted = Formatter.format("<@99999999999999999999999>", mockServer)
+
+        assertEquals("<span class=\"mention\">@99999999999999999999999</span>", formatted)
+    }
+
+    @Test
+    fun testMixedCodeBlocks() = runBlocking {
+        val formatted = Formatter.format("```\n**a**\n``` and `**b**` and **c**", mockServer)
+
+        assertTrue(formatted.contains("<div class=\"pre pre--multiline nohighlight\">**a**</div>"))
+        assertTrue(formatted.contains("<span class=\"pre pre--inline\">**b**</span>"))
+        assertTrue(formatted.contains("<strong>c</strong>"))
+    }
+
+    @Test
+    fun testQuote() = runBlocking {
+        assertEquals("<span class=\"quote\">quoted</span>", Formatter.format("> quoted", mockServer))
+        assertEquals(
+            "first<br /><span class=\"quote\">quoted</span>",
+            Formatter.format("first\n> quoted", mockServer)
+        )
+    }
+
+    @Test
+    fun testPlaceholderDelimiterInInput() = runBlocking {
+        assertEquals("a0b", Formatter.format("a\u00000\u0000b", mockServer))
+    }
+
+    private inner class MockChannel(times: List<Instant>, content: String = "Message") : DiscordChannel<DiscordFramework> {
+        override val framework: DiscordFramework = object : DiscordFramework {}
+        override val name: String = "general"
+        override val server: DiscordServer = mockServer
+        override val messages: List<DiscordMessage> = times.mapIndexed { index, time ->
+            createMockMessage(index.toLong(), content, time, this)
+        }
+    }
+
+    private fun createMockMessage(
+        messageId: Long,
+        msgContent: String,
+        msgTime: Instant,
+        msgChannel: DiscordChannel<*>
+    ): DiscordMessage {
         val mockAuthor = object : DiscordMessageAuthor {
             override val id: Long = 1000L + messageId
             override val name: String = "Author $messageId"
@@ -124,6 +174,7 @@ class TranscriptTest {
             override val reference: DiscordMessage? = null
             override val author: DiscordMessageAuthor = mockAuthor
             override val interaction: DiscordInteraction? = null
+            override val channel: DiscordChannel<*> = msgChannel
         }
     }
 }

@@ -3,7 +3,9 @@ package net.dungeonhub.transcripts
 import net.dungeonhub.wrapper.DiscordChannel
 import net.dungeonhub.wrapper.DiscordFramework
 import net.dungeonhub.wrapper.DiscordMessage
+import kotlinx.datetime.LocalDate
 import org.jsoup.Jsoup
+import org.jsoup.nodes.Element
 import java.io.IOException
 
 /**
@@ -40,20 +42,18 @@ object DiscordHtmlTranscripts {
 
         val chatLog = document.getElementById("chatlog")!! // chat log
 
-        val zone = java.time.ZoneId.of("UTC")
-        val dateFormatter = java.time.format.DateTimeFormatter.ofPattern("d MMMM yyyy", java.util.Locale.ENGLISH)
-        var lastDate: java.time.LocalDate? = null
+        var lastDate: LocalDate? = null
 
         for (message in messages.sortedBy { it.creationTime }) {
-            val msgDate = message.creationTime.atZone(zone).toLocalDate()
-            if (msgDate != lastDate) {
-                lastDate = msgDate
-                val divider = org.jsoup.nodes.Element("div")
-                divider.addClass("chatlog__date-divider")
-                divider.text(msgDate.format(dateFormatter))
-                chatLog.appendChild(divider)
+            val messageDate = TimeFormatter.toLocalDateTime(message.creationTime).date
+            if (messageDate != lastDate) {
+                lastDate = messageDate
+                val dateDivider = Element("div")
+                dateDivider.addClass("chatlog__date-divider")
+                dateDivider.text(TimeFormatter.formatDate(messageDate))
+                chatLog.appendChild(dateDivider)
             }
-            chatLog.appendChild(message.transcriptify(channel.server))
+            chatLog.appendChild(message.transcriptify())
         }
 
         return document.outerHtml()

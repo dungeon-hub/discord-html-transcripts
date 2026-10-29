@@ -1,12 +1,9 @@
 package net.dungeonhub.wrapper
 
 import net.dungeonhub.transcripts.Formatter
-import net.dungeonhub.wrapper.DiscordServer
+import net.dungeonhub.transcripts.TimeFormatter
 import org.jsoup.nodes.Element
 import java.time.Instant
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
-import java.util.Locale
 
 // TODO would message.actionRows also be interesting to have here?
 interface DiscordMessage {
@@ -18,8 +15,11 @@ interface DiscordMessage {
     val reference: DiscordMessage?
     val author: DiscordMessageAuthor?
     val interaction: DiscordInteraction?
+    val channel: DiscordChannel<*>
 
-    suspend fun transcriptify(server: DiscordServer? = null): Element {
+    suspend fun transcriptify(): Element {
+        val server = channel.server
+
         // create message group
         val messageGroup = Element("div")
         messageGroup.addClass("chatlog__message-group")
@@ -45,21 +45,9 @@ interface DiscordMessage {
         val timestamp = Element("span")
         timestamp.addClass("chatlog__timestamp")
 
-        val utcZone = ZoneId.of("UTC")
-        timestamp.text(
-            DateTimeFormatter
-                .ofPattern("HH:mm", Locale.ENGLISH)
-                .withZone(utcZone)
-                .format(creationTime)
-        )
-        // Full date shown on hover via native browser tooltip — no JS required.
-        timestamp.attr(
-            "title",
-            DateTimeFormatter
-                .ofPattern("EEEE, d MMMM yyyy 'at' HH:mm", Locale.ENGLISH)
-                .withZone(utcZone)
-                .format(creationTime)
-        )
+        timestamp.text(TimeFormatter.formatTime(creationTime))
+        // full date shown on hover
+        timestamp.attr("title", TimeFormatter.formatFullDateTime(creationTime))
 
         content.appendChild(timestamp)
 
@@ -69,12 +57,7 @@ interface DiscordMessage {
         messageContent.attr("id", "message-$id")
         messageContent.attr(
             "title",
-            "Message sent: ${
-                DateTimeFormatter
-                    .ofPattern("HH:mm:ss", Locale.ENGLISH)
-                    .withZone(utcZone)
-                    .format(creationTime)
-            }"
+            "Message sent: ${TimeFormatter.formatTimeWithSeconds(creationTime)}"
         )
 
         if (this.content.isNotBlank()) {
@@ -117,7 +100,7 @@ interface DiscordMessage {
         return messageGroup
     }
 
-    private suspend fun renderReferenceOrInteraction(messageGroup: Element, server: DiscordServer?) {
+    private suspend fun renderReferenceOrInteraction(messageGroup: Element, server: DiscordServer) {
         if (reference != null) {
             val referenceMessage = reference!!
             val author = referenceMessage.author
