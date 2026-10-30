@@ -141,6 +141,48 @@ class TranscriptTest {
         assertEquals("a0b", Formatter.format("a\u00000\u0000b", mockServer))
     }
 
+    @Test
+    fun testEscapedBacktick() = runBlocking {
+        assertEquals("`not code`", Formatter.format("\\`not code\\`", mockServer))
+        // a backslash inside code stays as it is
+        assertEquals("<span class=\"pre pre--inline\">a\\</span>", Formatter.format("`a\\`", mockServer))
+    }
+
+    @Test
+    fun testTruncate() {
+        assertEquals("short", Formatter.truncate("short", 42))
+        assertEquals("abc...", Formatter.truncate("abcdef", 3))
+        // the cut would land inside the mention / code / markdown, so the preview is extended to its end
+        assertEquals("hi <@123456789>...", Formatter.truncate("hi <@123456789> and more", 6))
+        assertEquals("a `some code`...", Formatter.truncate("a `some code` b", 5))
+        assertEquals("**bold text**...", Formatter.truncate("**bold text** rest", 4))
+    }
+
+    @Test
+    fun testEmbedMentionsResolve() = runBlocking {
+        val embed = object : DiscordMessageEmbed {
+            override val color: Color? = null
+            override val title: String? = null
+            override val description: String = "Hi <@123>"
+            override val fields: List<DiscordMessageEmbedField> = listOf(object : DiscordMessageEmbedField {
+                override val name: String = "Role"
+                override val value: String = "<@&456>"
+                override val isInline: Boolean = false
+            })
+            override val url: String? = null
+            override val thumbnail: String? = null
+            override val image: String? = null
+            override val footer: DiscordMessageEmbedFooter? = null
+            override val author: DiscordMessageEmbedAuthor? = null
+            override val timestamp: Instant? = null
+        }
+
+        val html = embed.transcriptify(mockServer).outerHtml()
+
+        assertTrue(html.contains("@TestUser"))
+        assertTrue(html.contains("@TestRole"))
+    }
+
     private inner class MockChannel(times: List<Instant>, content: String = "Message") : DiscordChannel<DiscordFramework> {
         override val framework: DiscordFramework = object : DiscordFramework {}
         override val name: String = "general"

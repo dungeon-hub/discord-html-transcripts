@@ -35,6 +35,16 @@ object Formatter {
     private val MENTION_CHANNEL: Pattern = Pattern.compile("<#(\\d+)>")
     // a backslash in front of one of these characters removes its markdown / mention meaning
     private val ESCAPED_CHARACTER: Pattern = Pattern.compile("\\\\([\\\\*_~`<>\\[\\]()#@])")
+    // escaped characters and code are matched in a single pass, so whichever comes first wins:
+    // "\\`" is a literal backtick, while a backslash inside a code block stays a backslash
+    private val ESCAPED_CHARACTER_OR_CODE: Pattern = Pattern.compile(
+        "${ESCAPED_CHARACTER.pattern()}|${CODE.pattern()}|${CODE_1.pattern()}",
+        Pattern.DOTALL
+    )
+    // everything that would break if a message preview was cut in the middle of it
+    private val PREVIEW_TOKENS = listOf(
+        ESCAPED_CHARACTER_OR_CODE, MENTION_USER, MENTION_ROLE, MENTION_CHANNEL, STRONG, EM, S, U, LINK
+    )
 
     /*
      * Code blocks, mentions and escaped characters are rendered first and swapped out for a placeholder,
@@ -91,13 +101,18 @@ object Formatter {
         // the delimiter must not appear in the input, otherwise it could be mistaken for a placeholder
         var newText = originalText.replace(PLACEHOLDER_DELIMITER, "")
 
-        newText = placeholders.replace(newText, CODE) {
-            "<div class=\"pre pre--multiline nohighlight\">${formatCodeBlock(escapeHtml(it.group(1)))}</div>"
+        newText = placeholders.replace(newText, ESCAPED_CHARACTER_OR_CODE) {
+            val escapedCharacter = it.group(1)
+            val codeBlock = it.group(2)
+            val inlineCode = it.group(3)
+
+            when {
+                escapedCharacter != null -> escapeHtml(escapedCharacter)
+                codeBlock != null ->
+                    "<div class=\"pre pre--multiline nohighlight\">${formatCodeBlock(escapeHtml(codeBlock))}</div>"
+                else -> "<span class=\"pre pre--inline\">${escapeHtml(inlineCode)}</span>"
+            }
         }
-        newText = placeholders.replace(newText, CODE_1) {
-            "<span class=\"pre pre--inline\">${escapeHtml(it.group(1))}</span>"
-        }
-        newText = placeholders.replace(newText, ESCAPED_CHARACTER) { escapeHtml(it.group(1)) }
 
         suspend fun resolveMentions(pattern: Pattern, prefix: Char, resolver: suspend (Long) -> String?) {
             newText = placeholders.replace(newText, pattern) {
@@ -169,6 +184,31 @@ object Formatter {
         }
 
         return placeholders.restore(newText)
+    }
+
+    /**
+     * Cuts [text] down to roughly [maxLength] characters. If the cut would land inside a mention, code block or
+     * markdown element, the text is kept until the end of that element instead, so it still renders correctly.
+     */
+    fun truncate(text: String, maxLength: Int): String {
+        if (text.length <= maxLength) return text
+
+        var end = maxLength
+        var extended = true
+        while (extended) {
+            extended = false
+            for (pattern in PREVIEW_TOKENS) {
+                val matcher = pattern.matcher(text)
+                while (matcher.find()) {
+                    if (matcher.start() < end && matcher.end() > end) {
+                        end = matcher.end()
+                        extended = true
+                    }
+                }
+            }
+        }
+
+        return if (end >= text.length) text else text.substring(0, end) + "..."
     }
 
     fun formatCodeBlock(group: String): String {

@@ -17,7 +17,7 @@ interface DiscordMessageEmbed {
     val author: DiscordMessageEmbedAuthor?
     val timestamp: Instant?
 
-    suspend fun transcriptify(): Element {
+    suspend fun transcriptify(server: DiscordServer): Element {
         val embedDiv = Element("div")
         embedDiv.addClass("chatlog__embed")
 
@@ -61,14 +61,14 @@ interface DiscordMessageEmbed {
 
                 val embedTitleMarkdown = Element("div")
                 embedTitleMarkdown.addClass("markdown preserve-whitespace")
-                    .html(Formatter.format(title!!))
+                    .html(Formatter.format(title!!, server))
 
                 embedTitleLink.appendChild(embedTitleMarkdown)
                 embedTitle.appendChild(embedTitleLink)
             } else {
                 val embedTitleMarkdown = Element("div")
                 embedTitleMarkdown.addClass("markdown preserve-whitespace")
-                    .html(Formatter.format(title!!))
+                    .html(Formatter.format(title!!, server))
 
                 embedTitle.appendChild(embedTitleMarkdown)
             }
@@ -83,7 +83,7 @@ interface DiscordMessageEmbed {
 
             val embedDescriptionMarkdown = Element("div")
             embedDescriptionMarkdown.addClass("markdown preserve-whitespace")
-            embedDescriptionMarkdown.html(Formatter.format(description!!))
+            embedDescriptionMarkdown.html(Formatter.format(description!!, server))
 
             embedDescription.appendChild(embedDescriptionMarkdown)
             embedText.appendChild(embedDescription)
@@ -95,7 +95,7 @@ interface DiscordMessageEmbed {
             embedFields.addClass("chatlog__embed-fields")
 
             for (field in fields) {
-                embedFields.appendChild(field.transcriptify())
+                embedFields.appendChild(field.transcriptify(server))
             }
 
             embedText.appendChild(embedFields)

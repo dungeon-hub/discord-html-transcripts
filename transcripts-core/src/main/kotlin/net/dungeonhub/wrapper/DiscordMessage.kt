@@ -91,7 +91,7 @@ interface DiscordMessage {
                     continue
                 }
 
-                content.appendChild(embed.transcriptify())
+                content.appendChild(embed.transcriptify(server))
             }
         }
 
@@ -108,11 +108,7 @@ interface DiscordMessage {
                 val color = Formatter.toHex(author.roleColor)
                 
                 val truncatedContent = if (referenceMessage.content.isNotBlank()) {
-                    if (referenceMessage.content.length > 42) {
-                        referenceMessage.content.substring(0, 42) + "..."
-                    } else {
-                        referenceMessage.content
-                    }
+                    Formatter.truncate(referenceMessage.content, 42)
                 } else {
                     "Click to see attachment"
                 }

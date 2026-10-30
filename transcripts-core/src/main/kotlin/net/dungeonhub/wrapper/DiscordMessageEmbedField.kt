@@ -8,7 +8,7 @@ interface DiscordMessageEmbedField {
     val value: String
     val isInline: Boolean
 
-    suspend fun transcriptify(): Element {
+    suspend fun transcriptify(server: DiscordServer): Element {
         val embedField = Element("div")
         embedField.addClass(
             if (isInline)
@@ -36,7 +36,7 @@ interface DiscordMessageEmbedField {
         val embedFieldValueMarkdown = Element("div")
         embedFieldValueMarkdown.addClass("markdown preserve-whitespace")
         embedFieldValueMarkdown
-            .html(Formatter.format(value))
+            .html(Formatter.format(value, server))
 
         embedFieldValue.appendChild(embedFieldValueMarkdown)
         embedField.appendChild(embedFieldValue)

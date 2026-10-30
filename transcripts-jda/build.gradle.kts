@@ -19,6 +19,7 @@ repositories {
 dependencies {
     api(project(":transcripts-core"))
     api(libs.net.dv8tion.jda)
+    implementation(libs.org.jetbrains.kotlinx.kotlinx.coroutines.core)
 
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")
