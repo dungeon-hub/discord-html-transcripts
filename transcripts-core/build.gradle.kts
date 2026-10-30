@@ -77,3 +77,14 @@ java {
 tasks.test {
     useJUnitPlatform()
 }
+val generateSampleTranscript by tasks.registering(JavaExec::class) {
+    group = "verification"
+    description = "Renders a transcript with example data and edge cases to build/sample-transcripts."
+
+    val output = layout.buildDirectory.file("sample-transcripts/sample-transcript.html")
+    classpath = sourceSets.test.get().runtimeClasspath
+    mainClass.set("net.dungeonhub.transcripts.SampleTranscriptKt")
+    jvmArgs("-Duser.timezone=UTC")
+    argumentProviders.add(CommandLineArgumentProvider { listOf(output.get().asFile.absolutePath) })
+    outputs.file(output)
+}

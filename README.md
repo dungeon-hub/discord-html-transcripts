@@ -60,3 +60,8 @@ val html = createHTML().div("chatlog") {
 }
 ```
 All user supplied text is escaped. The old jsoup based `transcriptify()` methods are deprecated and only kept for compatibility.
+
+## Sample transcript
+`./gradlew :transcripts-core:generateSampleTranscript` renders a transcript with every kind of content and many edge cases
+(see `SampleTranscript.kt` in the core tests) to `transcripts-core/build/sample-transcripts/sample-transcript.html`.
+CI renders it for every pull request and uploads it as the `sample-transcript` artifact.
