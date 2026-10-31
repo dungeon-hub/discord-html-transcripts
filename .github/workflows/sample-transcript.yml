@@ -33,10 +33,11 @@ jobs:
 
             - name: Upload sample transcript
               id: upload
-              uses: actions/upload-artifact@v4
+              uses: actions/upload-artifact@v7
               with:
-                  name: sample-transcript
-                  path: transcripts-core/build/sample-transcripts/
+                  # Upload the page itself instead of a zip, so it can be opened directly
+                  archive: false
+                  path: transcripts-core/build/sample-transcripts/sample-transcript.html
                   if-no-files-found: error
 
             - name: Link sample transcript in the job summary
@@ -46,6 +47,6 @@ jobs:
                   {
                     echo "### Sample transcript"
                     echo ""
-                    echo "[Download the rendered sample transcript]($ARTIFACT_URL) and open \`sample-transcript.html\` in a browser."
+                    echo "[Download \`sample-transcript.html\`]($ARTIFACT_URL) and open it in a browser."
                     echo "It contains every kind of message content plus edge cases such as HTML injection attempts, which must show up as plain text."
                   } >> "$GITHUB_STEP_SUMMARY"
