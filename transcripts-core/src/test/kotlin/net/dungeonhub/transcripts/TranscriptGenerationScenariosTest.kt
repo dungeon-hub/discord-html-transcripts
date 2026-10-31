@@ -1,5 +1,6 @@
 package net.dungeonhub.transcripts
 
+import kotlinx.coroutines.runBlocking
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -80,7 +81,7 @@ class TranscriptGenerationScenariosTest {
 
     private fun generate(messages: List<TestMessage>): Document {
         val channel = TestChannel("scenario", TestServer("Scenario Server"), messages)
-        return Jsoup.parse(DiscordHtmlTranscripts.createTranscript(channel))
+        return Jsoup.parse(runBlocking { DiscordHtmlTranscripts.createTranscript(channel) })
     }
 
     private fun message(

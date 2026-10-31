@@ -8,6 +8,9 @@ object TestFramework : DiscordFramework
 
 data class TestServer(override val name: String, override val icon: String? = null) : DiscordServer
 
+// messages are created before the channel they're transcribed with, so they reference this one by default
+val defaultTestChannel = TestChannel("default", TestServer("Default Server"), emptyList())
+
 data class TestChannel(
     override val name: String,
     override val server: DiscordServer,
@@ -48,7 +51,8 @@ data class TestMessage(
     override val embeds: List<DiscordMessageEmbed?> = emptyList(),
     override val attachments: List<DiscordMessageAttachment> = emptyList(),
     override val reference: DiscordMessage? = null,
-    override val interaction: DiscordInteraction? = null
+    override val interaction: DiscordInteraction? = null,
+    override val channel: DiscordChannel<*> = defaultTestChannel
 ) : DiscordMessage
 
 data class TestAttachment(

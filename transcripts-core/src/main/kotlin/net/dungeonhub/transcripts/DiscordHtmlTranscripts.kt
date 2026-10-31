@@ -3,7 +3,9 @@ package net.dungeonhub.transcripts
 import net.dungeonhub.wrapper.DiscordChannel
 import net.dungeonhub.wrapper.DiscordFramework
 import net.dungeonhub.wrapper.DiscordMessage
+import kotlinx.datetime.LocalDate
 import org.jsoup.Jsoup
+import org.jsoup.nodes.Element
 import java.io.IOException
 
 /**
@@ -17,12 +19,12 @@ import java.io.IOException
  */
 object DiscordHtmlTranscripts {
     @Throws(IOException::class)
-    fun <FW : DiscordFramework> createTranscript(channel: DiscordChannel<FW>): String {
+    suspend fun <FW : DiscordFramework> createTranscript(channel: DiscordChannel<FW>): String {
         return generateFromMessages(channel, channel.messages)
     }
 
     @Throws(IOException::class)
-    fun <FW : DiscordFramework> generateFromMessages(
+    suspend fun <FW : DiscordFramework> generateFromMessages(
         channel: DiscordChannel<FW>,
         messages: List<DiscordMessage>
     ): String {
@@ -40,7 +42,17 @@ object DiscordHtmlTranscripts {
 
         val chatLog = document.getElementById("chatlog")!! // chat log
 
+        var lastDate: LocalDate? = null
+
         for (message in messages.sortedBy { it.creationTime }) {
+            val messageDate = TimeFormatter.toLocalDateTime(message.creationTime).date
+            if (messageDate != lastDate) {
+                lastDate = messageDate
+                val dateDivider = Element("div")
+                dateDivider.addClass("chatlog__date-divider")
+                dateDivider.text(TimeFormatter.formatDate(messageDate))
+                chatLog.appendChild(dateDivider)
+            }
             chatLog.appendChild(message.transcriptify())
         }
 

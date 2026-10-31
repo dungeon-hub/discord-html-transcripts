@@ -8,15 +8,11 @@ plugins {
 
 group = "net.dungeon-hub"
 val artifactId = "transcripts-kord"
-version = "0.2.2"
+version = "0.3.0"
 description = "The Kord implementation for discord transcripts."
 
 repositories {
     mavenCentral()
-    maven {
-        url = uri("https://repo.kordex.dev/mirror")
-        name = "KordEx - Kord Mirror"
-    }
     mavenLocal()
 }
 

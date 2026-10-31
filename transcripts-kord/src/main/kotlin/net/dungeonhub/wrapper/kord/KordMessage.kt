@@ -1,6 +1,8 @@
 package net.dungeonhub.wrapper.kord
 
+import dev.kord.core.behavior.channel.asChannelOf
 import dev.kord.core.entity.Message
+import dev.kord.core.entity.channel.GuildMessageChannel
 import kotlinx.coroutines.runBlocking
 import net.dungeonhub.wrapper.DiscordMessage
 import net.dungeonhub.wrapper.DiscordMessageAttachment
@@ -10,7 +12,12 @@ import java.time.Instant
 import kotlin.time.ExperimentalTime
 import kotlin.time.toJavaInstant
 
-class KordMessage(val message: Message) : DiscordMessage {
+class KordMessage(val message: Message, override val channel: KordChannel) : DiscordMessage {
+    constructor(message: Message) : this(
+        message,
+        runBlocking { KordChannel(message.channel.asChannelOf<GuildMessageChannel>()) }
+    )
+
     override val id: Long
         get() = message.id.value.toLong()
     override val content: String
@@ -23,7 +30,7 @@ class KordMessage(val message: Message) : DiscordMessage {
     override val creationTime: Instant
         get() = message.timestamp.toJavaInstant()
     override val reference: DiscordMessage?
-        get() = message.referencedMessage?.let { KordMessage(it) }
+        get() = message.referencedMessage?.let { KordMessage(it, channel) }
     override val author: DiscordMessageAuthor?
         get() = message.author?.let {
             runBlocking {

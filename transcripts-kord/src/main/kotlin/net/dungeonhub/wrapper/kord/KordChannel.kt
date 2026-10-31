@@ -14,10 +14,10 @@ class KordChannel(val channel: GuildMessageChannel) : DiscordChannel<KordFramewo
         get() = KordFramework(channel.kord)
     override val name: String
         get() = channel.name
-    override val server: DiscordServer
-        get() = runBlocking { KordServer(channel.getGuild()) }
+    // cached, since every message accesses the server while being transcribed
+    override val server: DiscordServer by lazy { runBlocking { KordServer(channel.getGuild()) } }
     override val messages: List<DiscordMessage>
         get() = runBlocking {
-            channel.withStrategy(EntitySupplyStrategy.rest).messages.map { KordMessage(it) }.toList()
+            channel.withStrategy(EntitySupplyStrategy.rest).messages.map { KordMessage(it, this@KordChannel) }.toList()
         }
 }

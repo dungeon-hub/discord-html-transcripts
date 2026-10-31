@@ -1,5 +1,6 @@
 package net.dungeonhub.transcripts
 
+import kotlinx.coroutines.runBlocking
 import org.jsoup.Jsoup
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -11,7 +12,7 @@ class DiscordHtmlTranscriptsTest {
     private val author = TestAuthor(42, "example-user", "Example User", Color(0x12, 0x34, 0x56))
 
     @Test
-    fun `createTranscript generates a complete example transcript`() {
+    fun `createTranscript generates a complete example transcript`() = runBlocking<Unit> {
         val firstMessage = TestMessage(
             id = 100,
             content = "Hello **Discord**!",
@@ -56,7 +57,7 @@ class DiscordHtmlTranscriptsTest {
     }
 
     @Test
-    fun `generateFromMessages uses the supplied messages and sorts them chronologically`() {
+    fun `generateFromMessages uses the supplied messages and sorts them chronologically`() = runBlocking<Unit> {
         val channelMessage = TestMessage(1, "not included", Instant.EPOCH, author)
         val later = TestMessage(3, "later", Instant.parse("2024-01-03T00:00:00Z"), author)
         val earlier = TestMessage(2, "earlier", Instant.parse("2024-01-02T00:00:00Z"), author)

@@ -8,7 +8,7 @@ plugins {
 
 group = "net.dungeon-hub"
 val artifactId = "transcripts-core"
-version = "0.2.2"
+version = "0.3.0"
 description = "The core project to bring Discord Transcripts to the JVM."
 
 repositories {
@@ -19,9 +19,11 @@ repositories {
 dependencies {
     implementation(kotlin("stdlib-jdk8"))
     api(libs.org.jsoup.jsoup)
+    implementation(libs.org.jetbrains.kotlinx.kotlinx.datetime)
 
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
 }
 
 centralPortal {

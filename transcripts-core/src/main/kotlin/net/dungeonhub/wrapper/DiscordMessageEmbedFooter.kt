@@ -1,9 +1,8 @@
 package net.dungeonhub.wrapper
 
+import net.dungeonhub.transcripts.TimeFormatter
 import org.jsoup.nodes.Element
 import java.time.Instant
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 
 interface DiscordMessageEmbedFooter {
     val text: String?
@@ -28,8 +27,7 @@ interface DiscordMessageEmbedFooter {
 
         embedFooterText.text(
             if (timestamp != null) {
-                (text ?: "") + " • " + DateTimeFormatter.ofPattern("HH:mm:ss")
-                    .withZone(ZoneId.systemDefault()).format(timestamp)
+                (text ?: "") + " • " + TimeFormatter.formatTimeWithSeconds(timestamp)
             } else {
                 text ?: ""
             }

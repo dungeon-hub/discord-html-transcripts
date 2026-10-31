@@ -1,12 +1,13 @@
 package net.dungeonhub.transcripts
 
+import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.awt.Color
 
 class FormatterTest {
     @Test
-    fun `format converts supported Discord markdown`() {
+    fun `format converts supported Discord markdown`() = runBlocking<Unit> {
         assertEquals(
             "<strong>bold</strong> <em>italic</em> <s>strike</s> <u>underline</u> " +
                 "<span class=\"pre pre--inline\">code</span><br />next",
@@ -15,9 +16,9 @@ class FormatterTest {
     }
 
     @Test
-    fun `format converts links quotes and multiline code`() {
+    fun `format converts links quotes and multiline code`() = runBlocking<Unit> {
         assertEquals("<a href=\"https://example.com\">site</a>", Formatter.format("[site](https://example.com)"))
-        assertEquals("<span class=\"quote\"> quoted</span>", Formatter.format("> quoted"))
+        assertEquals("<span class=\"quote\">quoted</span>", Formatter.format("> quoted"))
         assertEquals(
             "<div class=\"pre pre--multiline nohighlight\">val answer = 42</div>",
             Formatter.format("```\n\nval answer = 42\n```")
