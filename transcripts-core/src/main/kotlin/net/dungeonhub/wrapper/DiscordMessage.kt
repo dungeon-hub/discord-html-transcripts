@@ -122,8 +122,8 @@ interface DiscordMessage {
                 reference.addClass("chatlog__reference")
                 
                 reference.html(
-                    "<img class=\"chatlog__reference-avatar\" src=\"${author.avatar}\" alt=\"Avatar\" loading=\"lazy\">" +
-                    "<span class=\"chatlog__reference-name\" title=\"${author.name}\" style=\"color: $color\">${author.displayName}</span>" +
+                    "<img class=\"chatlog__reference-avatar\" src=\"${Formatter.escapeHtml(author.avatar)}\" alt=\"Avatar\" loading=\"lazy\">" +
+                    "<span class=\"chatlog__reference-name\" title=\"${Formatter.escapeHtml(author.name)}\" style=\"color: $color\">${Formatter.escapeHtml(author.displayName)}</span>" +
                     "<div class=\"chatlog__reference-content\">" +
                     " <span class=\"chatlog__reference-link\" onclick=\"scrollToMessage(event, '${referenceMessage.id}')\">" +
                     "<em>$formattedPreview</em>" +
@@ -151,10 +151,10 @@ interface DiscordMessage {
             reference.addClass("chatlog__reference")
 
             reference.html(
-                "<img class=\"chatlog__reference-avatar\" src=\"${author.avatar}\" alt=\"Avatar\" loading=\"lazy\">" +
-                "<span class=\"chatlog__reference-name\" title=\"${author.name}\" style=\"color: $color\">${author.displayName}</span>" +
+                "<img class=\"chatlog__reference-avatar\" src=\"${Formatter.escapeHtml(author.avatar)}\" alt=\"Avatar\" loading=\"lazy\">" +
+                "<span class=\"chatlog__reference-name\" title=\"${Formatter.escapeHtml(author.name)}\" style=\"color: $color\">${Formatter.escapeHtml(author.displayName)}</span>" +
                 "<div class=\"chatlog__reference-content\">" +
-                " <span class=\"chatlog__reference-link\">used <div class=\"chatlog__command_name\">$applicationIcon ${interaction.name}</div></span>" +
+                " <span class=\"chatlog__reference-link\">used <div class=\"chatlog__command_name\">$applicationIcon ${Formatter.escapeHtml(interaction.name)}</div></span>" +
                 "</div>"
             )
 

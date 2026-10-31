@@ -183,6 +183,35 @@ class TranscriptTest {
         assertTrue(html.contains("@TestRole"))
     }
 
+    @Test
+    fun testUserControlledNamesAreEscaped() = runBlocking {
+        val payload = "<img src=x onerror=alert(1)>"
+        val maliciousAuthor = object : DiscordMessageAuthor {
+            override val id: Long = 1L
+            override val name: String = payload
+            override val displayName: String = payload
+            override val avatar: String = "\" onerror=\"alert(1)"
+            override val isBot: Boolean = false
+            override val roleColor: Color = Color.WHITE
+        }
+        val time = Instant.parse("2026-07-30T10:00:00Z")
+        val channel = MockChannel(listOf(time))
+        val referenced = createMockMessage(1L, "original", time, channel, msgAuthor = maliciousAuthor)
+        val reply = createMockMessage(2L, "reply", time, channel, msgReference = referenced)
+        val field = object : DiscordMessageEmbedField {
+            override val name: String = payload
+            override val value: String = "value"
+            override val isInline: Boolean = false
+        }
+
+        val html = reply.transcriptify().outerHtml() + field.transcriptify(mockServer).outerHtml()
+        val doc = Jsoup.parse(html)
+
+        assertTrue(doc.select("img[onerror]").isEmpty())
+        assertTrue(doc.select("[onerror]").isEmpty())
+        assertEquals(payload, doc.selectFirst(".chatlog__reference-name")!!.text())
+    }
+
     private inner class MockChannel(times: List<Instant>, content: String = "Message") : DiscordChannel<DiscordFramework> {
         override val framework: DiscordFramework = object : DiscordFramework {}
         override val name: String = "general"
@@ -196,7 +225,9 @@ class TranscriptTest {
         messageId: Long,
         msgContent: String,
         msgTime: Instant,
-        msgChannel: DiscordChannel<*>
+        msgChannel: DiscordChannel<*>,
+        msgReference: DiscordMessage? = null,
+        msgAuthor: DiscordMessageAuthor? = null
     ): DiscordMessage {
         val mockAuthor = object : DiscordMessageAuthor {
             override val id: Long = 1000L + messageId
@@ -213,8 +244,8 @@ class TranscriptTest {
             override val embeds: List<DiscordMessageEmbed?> = emptyList()
             override val attachments: List<DiscordMessageAttachment> = emptyList()
             override val creationTime: Instant = msgTime
-            override val reference: DiscordMessage? = null
-            override val author: DiscordMessageAuthor = mockAuthor
+            override val reference: DiscordMessage? = msgReference
+            override val author: DiscordMessageAuthor = msgAuthor ?: mockAuthor
             override val interaction: DiscordInteraction? = null
             override val channel: DiscordChannel<*> = msgChannel
         }

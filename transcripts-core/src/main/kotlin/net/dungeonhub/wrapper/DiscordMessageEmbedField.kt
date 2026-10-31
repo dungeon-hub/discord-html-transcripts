@@ -23,7 +23,7 @@ interface DiscordMessageEmbedField {
 
         val embedFieldNameMarkdown = Element("div")
         embedFieldNameMarkdown.addClass("markdown preserve-whitespace")
-        embedFieldNameMarkdown.html(name)
+        embedFieldNameMarkdown.html(Formatter.format(name, server))
 
         embedFieldName.appendChild(embedFieldNameMarkdown)
         embedField.appendChild(embedFieldName)

@@ -62,7 +62,7 @@ object Formatter {
         return String.format("%.1f %sB", bytes / unit.toDouble().pow(exp.toDouble()), pre)
     }
 
-    private fun escapeHtml(text: String): String {
+    fun escapeHtml(text: String): String {
         return text.replace("&", "&amp;")
             .replace("<", "&lt;")
             .replace(">", "&gt;")
