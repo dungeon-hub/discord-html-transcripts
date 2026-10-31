@@ -19,6 +19,7 @@ repositories {
 dependencies {
     implementation(kotlin("stdlib-jdk8"))
     api(libs.org.jsoup.jsoup)
+    api(libs.org.jetbrains.kotlinx.kotlinx.html)
 
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")
@@ -75,4 +76,15 @@ java {
 
 tasks.test {
     useJUnitPlatform()
+}
+val generateSampleTranscript by tasks.registering(JavaExec::class) {
+    group = "verification"
+    description = "Renders a transcript with example data and edge cases to build/sample-transcripts."
+
+    val output = layout.buildDirectory.file("sample-transcripts/sample-transcript.html")
+    classpath = sourceSets.test.get().runtimeClasspath
+    mainClass.set("net.dungeonhub.transcripts.SampleTranscriptKt")
+    jvmArgs("-Duser.timezone=UTC")
+    argumentProviders.add(CommandLineArgumentProvider { listOf(output.get().asFile.absolutePath) })
+    outputs.file(output)
 }

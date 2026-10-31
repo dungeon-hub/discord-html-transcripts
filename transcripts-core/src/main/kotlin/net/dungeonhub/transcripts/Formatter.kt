@@ -2,6 +2,7 @@ package net.dungeonhub.transcripts
 
 import java.awt.Color
 import java.util.Arrays
+import java.util.Locale
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.regex.Pattern
 import java.util.stream.Collectors
@@ -23,7 +24,8 @@ object Formatter {
     private val U: Pattern = Pattern.compile("__(.+?)__")
     private val CODE: Pattern = Pattern.compile("```(.+?)```", Pattern.DOTALL)
     private val CODE_1: Pattern = Pattern.compile("`(.+?)`")
-    private val QUOTE: Pattern = Pattern.compile("^>{1,3} (.*)$")
+    private val QUOTE: Pattern = Pattern.compile("^(?:&gt;){1,3} (.*)$")
+    private val QUOTE_PREFIX = "^(?:&gt;){1,3}".toRegex()
     private val LINK: Pattern = Pattern.compile("\\[([^\\[]+)\\](\\((www|http:|https:)+[^\\s]+[\\w]\\))")
     private val NEW_LINE: Pattern = Pattern.compile("\\n")
 
@@ -32,12 +34,27 @@ object Formatter {
         if (bytes < unit) return "$bytes B"
         val exp = (ln(bytes.toDouble()) / ln(unit.toDouble())).toInt()
         val pre = "KMGTPE"[exp - 1].toString()
-        return String.format("%.1f %sB", bytes / unit.toDouble().pow(exp.toDouble()), pre)
+        return String.format(Locale.ROOT, "%.1f %sB", bytes / unit.toDouble().pow(exp.toDouble()), pre)
     }
 
+    /**
+     * Escapes the characters that have a special meaning in HTML text and double-quoted attribute values.
+     */
+    fun escapeHtml(text: String): String {
+        return text
+            .replace("&", "&amp;")
+            .replace("<", "&lt;")
+            .replace(">", "&gt;")
+            .replace("\"", "&quot;")
+    }
+
+    /**
+     * Converts Discord markdown into HTML. The input is escaped first, so it is safe to embed the result as raw HTML.
+     */
     fun format(originalText: String): String {
-        var matcher = STRONG.matcher(originalText)
-        var newText = originalText
+        val escapedText = escapeHtml(originalText)
+        var matcher = STRONG.matcher(escapedText)
+        var newText = escapedText
         while (matcher.find()) {
             val group = matcher.group()
             newText = newText.replace(
@@ -74,8 +91,7 @@ object Formatter {
             val group = matcher.group()
             newText = newText.replace(
                 group,
-                "<span class=\"quote\">" + group.replaceFirst(">>>".toRegex(), "")
-                    .replaceFirst(">".toRegex(), "") + "</span>"
+                "<span class=\"quote\">" + group.replaceFirst(QUOTE_PREFIX, "") + "</span>"
             )
         }
         matcher = LINK.matcher(newText)

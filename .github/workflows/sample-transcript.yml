@@ -1,0 +1,52 @@
+name: Sample Transcript
+
+on:
+    push:
+        branches: [ "master" ]
+    pull_request:
+
+concurrency:
+    group: sample-transcript-${{ github.event.pull_request.number || github.ref }}
+    cancel-in-progress: true
+
+jobs:
+    render:
+        runs-on: ubuntu-latest
+        permissions:
+            contents: read
+
+        steps:
+            - uses: actions/checkout@v4
+              with:
+                persist-credentials: false
+            - name: Set up JDK 21
+              uses: actions/setup-java@v4
+              with:
+                  java-version: '21'
+                  distribution: 'jetbrains'
+
+            - name: Setup Gradle
+              uses: gradle/actions/setup-gradle@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
+
+            - name: Render sample transcript
+              run: ./gradlew :transcripts-core:generateSampleTranscript
+
+            - name: Upload sample transcript
+              id: upload
+              uses: actions/upload-artifact@v7
+              with:
+                  # Upload the page itself instead of a zip, so it can be opened directly
+                  archive: false
+                  path: transcripts-core/build/sample-transcripts/sample-transcript.html
+                  if-no-files-found: error
+
+            - name: Link sample transcript in the job summary
+              env:
+                  ARTIFACT_URL: ${{ steps.upload.outputs.artifact-url }}
+              run: |
+                  {
+                    echo "### Sample transcript"
+                    echo ""
+                    echo "[Download \`sample-transcript.html\`]($ARTIFACT_URL) and open it in a browser."
+                    echo "It contains every kind of message content plus edge cases such as HTML injection attempts, which must show up as plain text."
+                  } >> "$GITHUB_STEP_SUMMARY"
