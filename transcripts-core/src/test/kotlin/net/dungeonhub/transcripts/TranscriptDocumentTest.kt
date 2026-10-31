@@ -68,8 +68,8 @@ class TranscriptDocumentTest {
         assertEquals(3, resources.size)
         resources.forEach { resource ->
             val url = resource.attr("src").ifEmpty { resource.attr("href") }
-            assertTrue(!url.contains("@latest"), url)
-            assertTrue(resource.attr("integrity").startsWith("sha384-"), url)
+            assertTrue(Regex("@\\d+\\.\\d+\\.\\d+/").containsMatchIn(url), url)
+            assertTrue(resource.attr("integrity").matches(Regex("sha384-[A-Za-z0-9+/]{64}")), url)
             assertEquals("anonymous", resource.attr("crossorigin"), url)
         }
     }

@@ -10,7 +10,10 @@ class SampleTranscriptTest {
 
     @Test
     fun `renders every sample message`() {
-        assertEquals(SampleTranscript.messages().size, document.select("#chatlog > .chatlog__message-group").size)
+        val expectedIds = SampleTranscript.messages().map { it.id.toString() }.sorted()
+        val renderedIds = document.select(".chatlog__message").map { it.attr("data-message-id") }.sorted()
+
+        assertEquals(expectedIds, renderedIds)
     }
 
     @Test
@@ -41,8 +44,11 @@ class SampleTranscriptTest {
 
     @Test
     fun `messages are sorted chronologically`() {
+        val expectedIds = SampleTranscript.messages().sortedBy { it.creationTime }.map { it.id.toString() }
+        val renderedIds = document.select(".chatlog__message").map { it.attr("data-message-id") }
         val last = document.select(".chatlog__content").last()!!
 
+        assertEquals(expectedIds, renderedIds)
         assertTrue(last.text().startsWith("This message is passed in first"))
     }
 }
